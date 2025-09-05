@@ -23,16 +23,43 @@ const ChatBot = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [shouldScroll, setShouldScroll] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessageCount = useRef(messages.length);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Only scroll if we should and the element exists
+    // Add additional safety check to prevent unwanted scrolling from synthetic events
+    if (shouldScroll && messagesEndRef.current) {
+      // Use requestAnimationFrame to ensure smooth, controlled scrolling
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'end',
+          inline: 'nearest'
+        });
+      });
+      setShouldScroll(false);
+    }
   };
 
+  // Only scroll when new messages are actually added, not on every render
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > previousMessageCount.current) {
+      setShouldScroll(true);
+      previousMessageCount.current = messages.length;
+    }
   }, [messages]);
+
+  // Perform scroll after render when shouldScroll is true
+  useEffect(() => {
+    if (shouldScroll) {
+      // Add a small delay to ensure DOM is fully rendered and prevent conflicts with synthetic events
+      const timeoutId = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [shouldScroll]);
 
   const simulateBotResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
@@ -73,6 +100,7 @@ const ChatBot = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsTyping(true);
+    setShouldScroll(true); // Ensure we scroll for user messages
 
     // Simulate bot response delay
     setTimeout(() => {
@@ -85,6 +113,7 @@ const ChatBot = () => {
       
       setMessages(prev => [...prev, botResponse]);
       setIsTyping(false);
+      setShouldScroll(true); // Ensure we scroll for bot messages
       
       toast({
         title: "CarBot Antwort",

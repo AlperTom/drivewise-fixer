@@ -10,30 +10,53 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import WidgetDemo from "./pages/WidgetDemo";
 import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <ErrorBoundary>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/demo" element={<WidgetDemo />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </ErrorBoundary>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Prevent synthetic mouse events from causing unwanted scroll behavior
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      // Filter out synthetic events that might cause scroll issues
+      // Synthetic events from tools often have x: 0 coordinates consistently
+      if (event.clientX === 0 && !event.isTrusted) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    };
+
+    // Add the event listener with capture to intercept early
+    document.addEventListener('mousemove', handleMouseMove, { capture: true, passive: false });
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove, { capture: true });
+    };
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <ErrorBoundary>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/demo" element={<WidgetDemo />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </ErrorBoundary>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
