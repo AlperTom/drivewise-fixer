@@ -12,12 +12,14 @@ import {
   Bot,
   Calendar,
   Mail,
-  Globe
+  Globe,
+  Shield
 } from 'lucide-react';
 import CompanySetup from '@/components/CompanySetup';
 import LeadDashboard from '@/components/LeadDashboard';
 import ChatBot from '@/components/ChatBot';
 import WidgetManager from '@/components/WidgetManager';
+import SecurityMonitor from '@/components/SecurityMonitor';
 import { CalendarIntegration } from '@/components/CalendarIntegration';
 import { EmailSetup } from '@/components/EmailSetup';
 import { useCompany } from '@/hooks/useCompany';
@@ -151,7 +153,7 @@ const Dashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue={isCompanySetup ? "overview" : "setup"} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span>Übersicht</span>
@@ -167,6 +169,10 @@ const Dashboard = () => {
             <TabsTrigger value="widget" className="flex items-center space-x-2">
               <Globe className="h-4 w-4" />
               <span>Widget</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>Sicherheit</span>
             </TabsTrigger>
             <TabsTrigger value="setup" className="flex items-center space-x-2">
               <Settings className="h-4 w-4" />
@@ -336,6 +342,11 @@ const Dashboard = () => {
           {/* Widget Tab */}
           <TabsContent value="widget">
             <WidgetManager />
+          </TabsContent>
+
+          {/* Security Tab */}
+          <TabsContent value="security">
+            <SecurityMonitor />
           </TabsContent>
 
           {/* Setup Tab */}

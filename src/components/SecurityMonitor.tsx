@@ -10,11 +10,11 @@ import { useAuth } from '@/contexts/AuthContext';
 interface SecurityEvent {
   id: string;
   event_type: string;
-  ip_address: string;
-  user_agent: string;
-  details: any;
+  ip_address: string | null;
+  user_agent: string | null;
+  details: Record<string, any> | null;
   created_at: string;
-  widget_id?: string;
+  widget_id?: string | null;
 }
 
 interface SecurityStats {
@@ -66,7 +66,8 @@ const SecurityMonitor = () => {
       
       const apiKeyFailures = securityEvents.filter(e => 
         e.event_type === 'widget_api_key_validation' && 
-        e.details?.api_key_provided === false
+        e.details && typeof e.details === 'object' && 'api_key_provided' in e.details && 
+        e.details.api_key_provided === false
       ).length;
       
       const suspiciousActivity = securityEvents.filter(e => 
@@ -79,7 +80,7 @@ const SecurityMonitor = () => {
         failedAuth,
         apiKeyFailures,
         suspiciousActivity,
-        recentEvents: securityEvents.slice(0, 10)
+        recentEvents: securityEvents.slice(0, 10) as SecurityEvent[]
       });
 
     } catch (error) {
@@ -107,7 +108,7 @@ const SecurityMonitor = () => {
       case 'invalid_token':
         return <AlertTriangle className="h-4 w-4 text-destructive" />;
       case 'widget_api_key_validation':
-        return <Shield className="h-4 w-4 text-warning" />;
+        return <Shield className="h-4 w-4 text-yellow-500" />;
       case 'suspicious_activity':
         return <Eye className="h-4 w-4 text-destructive" />;
       default:
@@ -119,7 +120,9 @@ const SecurityMonitor = () => {
     if (event.event_type === 'failed_login' || event.event_type === 'suspicious_activity') {
       return 'high';
     }
-    if (event.event_type === 'widget_api_key_validation' && !event.details?.api_key_provided) {
+    if (event.event_type === 'widget_api_key_validation' && 
+        event.details && typeof event.details === 'object' && 
+        'api_key_provided' in event.details && !event.details.api_key_provided) {
       return 'medium';
     }
     return 'low';
@@ -178,9 +181,9 @@ const SecurityMonitor = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">API Key Failures</p>
-                <p className="text-2xl font-bold text-warning">{stats.apiKeyFailures}</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.apiKeyFailures}</p>
               </div>
-              <Shield className="h-8 w-8 text-warning" />
+              <Shield className="h-8 w-8 text-yellow-500" />
             </div>
           </CardContent>
         </Card>
