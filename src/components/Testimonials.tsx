@@ -128,21 +128,6 @@ const Testimonials = () => {
             </div>
           ))}
         </div>
-
-        {/* Trust Badges */}
-        <div className="mt-20 pt-16 border-t border-border">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold mb-4">Vertraut von führenden Unternehmen</h3>
-            <p className="text-muted-foreground">Zertifiziert nach deutschen Datenschutz- und Sicherheitsstandards</p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-60">
-            <div className="text-2xl font-bold text-muted-foreground">TÜV Süd</div>
-            <div className="text-2xl font-bold text-muted-foreground">DSGVO</div>
-            <div className="text-2xl font-bold text-muted-foreground">ISO 27001</div>
-            <div className="text-2xl font-bold text-muted-foreground">Made in DE</div>
-          </div>
-        </div>
       </div>
     </section>
   );
