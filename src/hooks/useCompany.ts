@@ -490,25 +490,88 @@ export const useCompany = () => {
     );
   };
 
+  // Optimized data fetching - single effect to prevent cascading requests
   useEffect(() => {
-    if (user) {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchAllData = async () => {
       setLoading(true);
-      fetchCompany().finally(() => setLoading(false));
-    }
-  }, [user]);
+      
+      try {
+        // Fetch company first
+        const { data: companyData, error: companyError } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
 
-  useEffect(() => {
-    if (company) {
-      fetchServices();
-      fetchQuickActions();
-    }
-  }, [company]);
+        if (companyError && companyError.code !== 'PGRST116') {
+          throw companyError;
+        }
 
-  useEffect(() => {
-    if (services.length > 0) {
-      fetchPricingRules();
-    }
-  }, [services]);
+        const fetchedCompany = companyData ? convertCompanyRow(companyData) : null;
+        setCompany(fetchedCompany);
+
+        if (fetchedCompany) {
+          // Fetch all related data in parallel to avoid cascading requests
+          const [servicesResult, quickActionsResult] = await Promise.all([
+            supabase
+              .from('services')
+              .select('*')
+              .eq('company_id', fetchedCompany.id)
+              .eq('is_active', true)
+              .order('display_order'),
+            supabase
+              .from('quick_actions')
+              .select('*')
+              .eq('company_id', fetchedCompany.id)
+              .eq('is_active', true)
+              .order('display_order')
+          ]);
+
+          if (servicesResult.error) throw servicesResult.error;
+          if (quickActionsResult.error) throw quickActionsResult.error;
+
+          const fetchedServices = servicesResult.data ? servicesResult.data.map(convertServiceRow) : [];
+          setServices(fetchedServices);
+          setQuickActions(quickActionsResult.data ? quickActionsResult.data.map(convertQuickActionRow) : []);
+
+          // Fetch pricing rules if there are services
+          if (fetchedServices.length > 0) {
+            const serviceIds = fetchedServices.map(s => s.id);
+            const { data: pricingData, error: pricingError } = await supabase
+              .from('pricing_rules')
+              .select('*')
+              .in('service_id', serviceIds);
+
+            if (pricingError) throw pricingError;
+            setPricingRules(pricingData ? pricingData.map(convertPricingRuleRow) : []);
+          } else {
+            setPricingRules([]);
+          }
+        } else {
+          // Clear all data if no company
+          setServices([]);
+          setPricingRules([]);
+          setQuickActions([]);
+        }
+      } catch (error) {
+        console.error('Error fetching company data:', error);
+        toast({
+          title: 'Fehler',
+          description: 'Daten konnten nicht geladen werden.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, [user?.id]); // Only depend on user.id to prevent unnecessary refetches
 
   return {
     company,
@@ -521,13 +584,6 @@ export const useCompany = () => {
     savePricingRule,
     saveQuickAction,
     getPricing,
-    findServiceByName,
-    refreshData: () => {
-      fetchCompany();
-      if (company) {
-        fetchServices();
-        fetchQuickActions();
-      }
-    }
+    findServiceByName
   };
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -383,19 +383,21 @@ export const useLeads = (companyId?: string) => {
     }
   };
 
-  // Get lead statistics
-  const getLeadStats = () => {
-    const stats = {
-      total: leads.length,
-      new: leads.filter(l => l.status === 'new').length,
-      hot: leads.filter(l => l.lead_score >= 80).length,
-      warm: leads.filter(l => l.lead_score >= 60 && l.lead_score < 80).length,
-      cold: leads.filter(l => l.lead_score < 60).length,
-      converted: leads.filter(l => l.status === 'converted').length
-    };
+  // Get lead statistics - memoized for performance
+  const getLeadStats = useMemo(() => {
+    return () => {
+      const stats = {
+        total: leads.length,
+        new: leads.filter(l => l.status === 'new').length,
+        hot: leads.filter(l => l.lead_score >= 80).length,
+        warm: leads.filter(l => l.lead_score >= 60 && l.lead_score < 80).length,
+        cold: leads.filter(l => l.lead_score < 60).length,
+        converted: leads.filter(l => l.status === 'converted').length
+      };
 
-    return stats;
-  };
+      return stats;
+    };
+  }, [leads]);
 
   useEffect(() => {
     if (companyId) {

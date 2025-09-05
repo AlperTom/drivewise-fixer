@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,10 +28,14 @@ const Dashboard = () => {
   const { company, services, quickActions } = useCompany();
   const { getLeadStats } = useLeads(company?.id);
   
-  const stats = getLeadStats();
+  // Memoize expensive calculations to prevent unnecessary re-renders
+  const stats = useMemo(() => getLeadStats(), [getLeadStats]);
 
-  // Check if company is set up
-  const isCompanySetup = company && company.company_name && services.length > 0;
+  // Check if company is set up - memoized to prevent recalculation
+  const isCompanySetup = useMemo(() => 
+    company && company.company_name && services.length > 0, 
+    [company, services.length]
+  );
 
   return (
     <div className="min-h-screen bg-background">
