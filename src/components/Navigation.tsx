@@ -43,20 +43,20 @@ const Navigation = () => {
         </div>
 
         {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-              Preise
-            </a>
-            <a href="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
-              Live Demo
-            </a>
-            <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
-              Kontakt
-            </a>
-          </div>
+        <div className="hidden md:flex items-center space-x-8">
+          <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">
+            Features
+          </a>
+          <a href="/#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            Preise
+          </a>
+          <Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
+            Live Demo
+          </Link>
+          <a href="/#contact" className="text-muted-foreground hover:text-foreground transition-colors">
+            Kontakt
+          </a>
+        </div>
 
         {/* User Menu */}
         <div className="flex items-center space-x-4">
@@ -71,7 +71,7 @@ const Navigation = () => {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56 bg-card border-border shadow-lg z-50" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
@@ -82,10 +82,16 @@ const Navigation = () => {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard" className="flex items-center">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>Abmelden</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

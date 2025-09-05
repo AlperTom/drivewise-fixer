@@ -280,7 +280,7 @@ const CompanySetup = () => {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                      <SelectContent className="bg-card border-border shadow-lg z-50">
                       <SelectItem value="werkstatt">Werkstatt</SelectItem>
                       <SelectItem value="detailing">Detailing</SelectItem>
                       <SelectItem value="cleaning">Reinigung</SelectItem>
@@ -384,111 +384,167 @@ const CompanySetup = () => {
 
         {/* Services */}
         <TabsContent value="services">
+          {/* Service Templates Section - NOW PROMINENT */}
+          <Card className="card-automotive mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-xl">
+                <Zap className="h-6 w-6 text-primary" />
+                <span>Service-Vorlagen - Schnell hinzufügen</span>
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Wählen Sie aus professionellen Automotive-Service-Vorlagen mit typischen Preisen
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ServiceTemplateSelector 
+                onSelectTemplate={(template) => {
+                  setServiceForm({
+                    service_name: template.service_name,
+                    description: template.description,
+                    category: template.category,
+                    estimated_duration: template.estimated_duration,
+                    requires_appointment: template.requires_appointment,
+                    service_details: template.service_details,
+                    is_active: true,
+                    display_order: services.length
+                  });
+                  
+                  // Auto-save the selected template
+                  handleServiceSave();
+                }}
+                existingServices={services}
+              />
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Custom Service Form - Expandable */}
             <Card className="card-automotive">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Wrench className="h-5 w-5" />
-                  <span>{editingService ? 'Service bearbeiten' : 'Neuer Service'}</span>
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Wrench className="h-5 w-5" />
+                    <span>Eigener Service</span>
+                  </CardTitle>
+                  {!editingService && serviceForm.service_name === '' && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setServiceForm(prev => ({ ...prev, service_name: 'Neuer Service' }))}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Erstellen
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="service_name">Service Name</Label>
-                  <Input
-                    id="service_name"
-                    value={serviceForm.service_name}
-                    onChange={(e) => setServiceForm(prev => ({ ...prev, service_name: e.target.value }))}
-                    placeholder="z.B. Ölwechsel"
-                  />
-                </div>
+              
+              {(editingService || serviceForm.service_name !== '') && (
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="service_name">Service Name</Label>
+                    <Input
+                      id="service_name"
+                      value={serviceForm.service_name}
+                      onChange={(e) => setServiceForm(prev => ({ ...prev, service_name: e.target.value }))}
+                      placeholder="z.B. Ölwechsel"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="category">Kategorie</Label>
-                  <Select 
-                    value={serviceForm.category} 
-                    onValueChange={(value) => setServiceForm(prev => ({ ...prev, category: value as any }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="maintenance">Wartung</SelectItem>
-                      <SelectItem value="repair">Reparatur</SelectItem>
-                      <SelectItem value="detailing">Aufbereitung</SelectItem>
-                      <SelectItem value="inspection">Inspektion</SelectItem>
-                      <SelectItem value="cleaning">Reinigung</SelectItem>
-                      <SelectItem value="tuning">Tuning</SelectItem>
-                      <SelectItem value="other">Sonstiges</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div>
+                    <Label htmlFor="category">Kategorie</Label>
+                    <Select 
+                      value={serviceForm.category} 
+                      onValueChange={(value) => setServiceForm(prev => ({ ...prev, category: value as any }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-border shadow-lg z-50">
+                        <SelectItem value="maintenance">Wartung</SelectItem>
+                        <SelectItem value="repair">Reparatur</SelectItem>
+                        <SelectItem value="detailing">Aufbereitung</SelectItem>
+                        <SelectItem value="inspection">Inspektion</SelectItem>
+                        <SelectItem value="cleaning">Reinigung</SelectItem>
+                        <SelectItem value="tuning">Tuning</SelectItem>
+                        <SelectItem value="other">Sonstiges</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <Label htmlFor="estimated_duration">Geschätzte Dauer (Minuten)</Label>
-                  <Input
-                    id="estimated_duration"
-                    type="number"
-                    value={serviceForm.estimated_duration}
-                    onChange={(e) => setServiceForm(prev => ({ ...prev, estimated_duration: parseInt(e.target.value) || 0 }))}
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="estimated_duration">Geschätzte Dauer (Minuten)</Label>
+                    <Input
+                      id="estimated_duration"
+                      type="number"
+                      value={serviceForm.estimated_duration}
+                      onChange={(e) => setServiceForm(prev => ({ ...prev, estimated_duration: parseInt(e.target.value) || 0 }))}
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="description">Beschreibung</Label>
-                  <Textarea
-                    id="description"
-                    value={serviceForm.description}
-                    onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Kurze Beschreibung des Services"
-                    rows={3}
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="description">Beschreibung</Label>
+                    <Textarea
+                      id="description"
+                      value={serviceForm.description}
+                      onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Kurze Beschreibung des Services"
+                      rows={3}
+                    />
+                  </div>
 
-                <Button onClick={handleServiceSave} className="w-full btn-carbot">
-                  <Save className="h-4 w-4 mr-2" />
-                  {editingService ? 'Service aktualisieren' : 'Service speichern'}
-                </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={handleServiceSave} className="flex-1 btn-carbot">
+                      <Save className="h-4 w-4 mr-2" />
+                      {editingService ? 'Aktualisieren' : 'Speichern'}
+                    </Button>
 
-                {editingService && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setEditingService(null);
-                      setServiceForm({
-                        service_name: '',
-                        description: '',
-                        category: 'maintenance',
-                        estimated_duration: 60,
-                        requires_appointment: true,
-                        service_details: '',
-                        is_active: true,
-                        display_order: services.length
-                      });
-                    }}
-                    className="w-full"
-                  >
-                    Abbrechen
-                  </Button>
-                )}
-              </CardContent>
+                    {(editingService || serviceForm.service_name !== '') && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingService(null);
+                          setServiceForm({
+                            service_name: '',
+                            description: '',
+                            category: 'maintenance',
+                            estimated_duration: 60,
+                            requires_appointment: true,
+                            service_details: '',
+                            is_active: true,
+                            display_order: services.length
+                          });
+                        }}
+                      >
+                        Abbrechen
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              )}
             </Card>
 
+            {/* Services List */}
             <Card className="card-automotive">
               <CardHeader>
-                <CardTitle>Ihre Services</CardTitle>
+                <CardTitle>Ihre Services ({services.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-96">
                   <div className="space-y-2">
                     {services.map((service) => (
-                      <div key={service.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
+                      <div key={service.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="flex-1">
                           <h4 className="font-medium">{service.service_name}</h4>
                           <p className="text-sm text-muted-foreground">{service.description}</p>
-                          <Badge variant="outline" className="mt-1">
-                            {service.category}
-                          </Badge>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {service.category}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {service.estimated_duration} Min
+                            </span>
+                          </div>
                         </div>
                         <Button
                           variant="ghost"
@@ -507,48 +563,15 @@ const CompanySetup = () => {
                 
                 {services.length === 0 && (
                   <div className="text-center py-8">
+                    <Wrench className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                     <p className="text-muted-foreground">
-                      Noch keine Services hinzugefügt. Verwenden Sie die Service-Vorlagen oder erstellen Sie eigene.
+                      Noch keine Services hinzugefügt. Nutzen Sie die Vorlagen oben für einen schnellen Start.
                     </p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
-
-          {/* Service Templates Section */}
-          {!editingService && (
-            <div className="mt-6">
-              <Card className="card-automotive">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Wrench className="h-5 w-5 text-primary" />
-                    <span>Service-Vorlagen</span>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Wählen Sie aus vorgefertigten Automotive-Services
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ServiceTemplateSelector 
-                    onSelectTemplate={(template) => {
-                      setServiceForm({
-                        service_name: template.service_name,
-                        description: template.description,
-                        category: template.category,
-                        estimated_duration: template.estimated_duration,
-                        requires_appointment: template.requires_appointment,
-                        service_details: template.service_details,
-                        is_active: true,
-                        display_order: services.length
-                      });
-                    }}
-                    existingServices={services}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </TabsContent>
 
         {/* Pricing */}
@@ -600,7 +623,7 @@ const CompanySetup = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="Service auswählen..." />
                     </SelectTrigger>
-                    <SelectContent>
+                        <SelectContent className="bg-card border-border shadow-lg z-50">
                       {services.map((service) => (
                         <SelectItem key={service.id} value={service.id}>
                           {service.service_name}

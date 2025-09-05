@@ -43,13 +43,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         if (event === 'SIGNED_IN') {
           toast({
-            title: "Welcome back!",
-            description: "You have successfully signed in.",
+            title: "Willkommen zurück!",
+            description: "Sie wurden erfolgreich angemeldet.",
           });
+          
+          // Redirect to dashboard after successful login
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1000);
         } else if (event === 'SIGNED_OUT') {
           toast({
-            title: "Signed out",
-            description: "You have been signed out successfully.",
+            title: "Abgemeldet",
+            description: "Sie wurden erfolgreich abgemeldet.",
           });
         }
       }

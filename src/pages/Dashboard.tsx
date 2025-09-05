@@ -18,6 +18,8 @@ import CompanySetup from '@/components/CompanySetup';
 import LeadDashboard from '@/components/LeadDashboard';
 import ChatBot from '@/components/ChatBot';
 import WidgetManager from '@/components/WidgetManager';
+import { CalendarIntegration } from '@/components/CalendarIntegration';
+import { EmailSetup } from '@/components/EmailSetup';
 import { useCompany } from '@/hooks/useCompany';
 import { useLeads } from '@/hooks/useLeads';
 
@@ -43,46 +45,49 @@ const Dashboard = () => {
         </div>
 
         {!isCompanySetup ? (
-          // Setup Welcome
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bot className="h-6 w-6" />
-                <span>Willkommen bei CarBot!</span>
+          // Setup Welcome - Improved styling
+          <Card className="mb-8 border-0 bg-gradient-card shadow-card-automotive">
+            <CardHeader className="text-center pb-4">
+              <div className="flex items-center justify-center mb-4">
+                <div className="p-4 rounded-2xl bg-gradient-carbot shadow-carbot">
+                  <Bot className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl mb-2">
+                Willkommen bei CarBot!
               </CardTitle>
+              <p className="text-muted-foreground">
+                Richten Sie Ihren personalisierten AI-Assistenten in wenigen Minuten ein
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Bot className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mb-2">
-                  Lassen Sie uns Ihren personalisierten ChatBot einrichten
-                </h3>
-                <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                  In wenigen Schritten verwandeln wir CarBot in Ihren digitalen Serviceberater. 
-                  Fügen Sie Ihre Services hinzu, legen Sie Preise fest und personalisieren Sie die Schnellaktionen.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-6">
-                  <div className="p-4 border rounded-lg">
-                    <Building2 className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <h4 className="font-medium">1. Firmenprofil</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Name, Kontakt und Spezialisierungen
-                    </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="text-center p-6 border border-border/50 rounded-xl hover:border-primary/50 transition-colors">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Building2 className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <Settings className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <h4 className="font-medium">2. Services & Preise</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Ihre Angebote mit intelligenten Preisen
-                    </p>
+                  <h4 className="font-semibold mb-2">1. Firmenprofil</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Name, Kontakt und Spezialisierungen hinterlegen
+                  </p>
+                </div>
+                <div className="text-center p-6 border border-border/50 rounded-xl hover:border-primary/50 transition-colors">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Settings className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <MessageSquare className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <h4 className="font-medium">3. ChatBot testen</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Personalisierte Antworten erleben
-                    </p>
+                  <h4 className="font-semibold mb-2">2. Services & Preise</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Aus Vorlagen wählen oder eigene Services erstellen
+                  </p>
+                </div>
+                <div className="text-center p-6 border border-border/50 rounded-xl hover:border-primary/50 transition-colors">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <MessageSquare className="h-6 w-6 text-primary" />
                   </div>
+                  <h4 className="font-semibold mb-2">3. ChatBot aktivieren</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Widget generieren und in Website einbinden
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -169,7 +174,7 @@ const Dashboard = () => {
           <TabsContent value="overview">
             {isCompanySetup ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+                <Card className="card-automotive">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Building2 className="h-5 w-5" />
@@ -180,7 +185,7 @@ const Dashboard = () => {
                     <div className="space-y-4">
                       <div>
                         <h3 className="text-lg font-semibold">{company?.company_name}</h3>
-                        <p className="text-sm text-muted-foreground">{company?.business_type}</p>
+                        <p className="text-sm text-muted-foreground capitalize">{company?.business_type}</p>
                       </div>
                       
                       {company?.specialties && company.specialties.length > 0 && (
@@ -190,7 +195,7 @@ const Dashboard = () => {
                             {company.specialties.map((specialty, index) => (
                               <span 
                                 key={index} 
-                                className="px-2 py-1 bg-primary/10 text-primary rounded text-sm"
+                                className="px-2 py-1 bg-primary/10 text-primary rounded-md text-sm"
                               >
                                 {specialty}
                               </span>
@@ -200,11 +205,11 @@ const Dashboard = () => {
                       )}
 
                       <div className="grid grid-cols-2 gap-4 pt-4">
-                        <div className="text-center">
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
                           <p className="text-2xl font-bold text-primary">{services.length}</p>
                           <p className="text-sm text-muted-foreground">Services</p>
                         </div>
-                        <div className="text-center">
+                        <div className="text-center p-3 bg-muted/50 rounded-lg">
                           <p className="text-2xl font-bold text-primary">{quickActions.length}</p>
                           <p className="text-sm text-muted-foreground">Schnellaktionen</p>
                         </div>
@@ -213,7 +218,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="card-automotive">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Users className="h-5 w-5" />
@@ -222,30 +227,30 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 border rounded">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <p className="font-medium">Neue Leads (heute)</p>
                           <p className="text-sm text-muted-foreground">ChatBot generiert</p>
                         </div>
-                        <span className="text-2xl font-bold text-blue-600">{stats.new}</span>
+                        <span className="text-2xl font-bold text-automotive-blue">{stats.new}</span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 border rounded">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <p className="font-medium">Conversion Rate</p>
                           <p className="text-sm text-muted-foreground">Leads zu Kunden</p>
                         </div>
-                        <span className="text-2xl font-bold text-green-600">
+                        <span className="text-2xl font-bold text-automotive-success">
                           {stats.total > 0 ? Math.round((stats.converted / stats.total) * 100) : 0}%
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 border rounded">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <p className="font-medium">Durchschn. Lead Score</p>
                           <p className="text-sm text-muted-foreground">Qualität der Leads</p>
                         </div>
-                        <span className="text-2xl font-bold text-orange-600">
+                        <span className="text-2xl font-bold text-automotive-warning">
                           {stats.total > 0 ? Math.round((stats.hot * 90 + stats.warm * 70 + stats.cold * 50) / stats.total) : 0}
                         </span>
                       </div>
@@ -273,71 +278,54 @@ const Dashboard = () => {
 
           {/* ChatBot Tab */}
           <TabsContent value="chatbot">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Bot className="h-5 w-5" />
-                    <span>ChatBot Vorschau</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-96">
-                    <ChatBot />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>ChatBot Informationen</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-primary/5 rounded-lg">
-                      <h4 className="font-medium mb-2">Ihr personalisierter Assistant</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Der ChatBot kennt jetzt Ihre Services, Preise und kann intelligent auf 
-                        Kundenanfragen antworten. Leads werden automatisch erfasst und bewertet.
-                      </p>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2">
+                <Card className="card-automotive">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Bot className="h-5 w-5" />
+                      <span>ChatBot Vorschau</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-96">
+                      <ChatBot />
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                    <div>
-                      <h4 className="font-medium mb-2">Features</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        <li>✅ Automatische Lead-Erkennung</li>
-                        <li>✅ Intelligente Lead-Bewertung</li>
-                        <li>✅ Service-spezifische Antworten</li>
-                        <li>✅ Echtzeit-Preisauskunft</li>
-                        <li>✅ Terminbuchung-Integration</li>
-                        <li>✅ E-Mail Benachrichtigungen</li>
-                      </ul>
-                    </div>
+              <div className="space-y-6">
+                <Card className="card-automotive">
+                  <CardHeader>
+                    <CardTitle>Integration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-primary/5 rounded-lg">
+                        <h4 className="font-medium mb-2">✅ OpenAI ChatBot aktiv</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Ihr intelligenter AI-Assistant ist konfiguriert und einsatzbereit.
+                        </p>
+                      </div>
 
-                    <div>
-                      <h4 className="font-medium mb-2">Integration</h4>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Integrieren Sie den ChatBot in Ihre Website mit diesem Code:
-                      </p>
-                      <div className="p-3 bg-muted rounded text-xs font-mono">
-                        {`<script src="https://your-domain.com/carbot.js"></script>
-<div id="carbot-widget" data-company="${company?.id}"></div>`}
+                      <div>
+                        <h4 className="font-medium mb-2">Features</h4>
+                        <ul className="text-sm text-muted-foreground space-y-1">
+                          <li>✅ Firmenspezifische Antworten</li>
+                          <li>✅ Service-Empfehlungen</li>
+                          <li>✅ Preisauskunft</li>
+                          <li>✅ Lead-Generierung</li>
+                          <li>✅ Terminvereinbarung</li>
+                        </ul>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
 
-                    <div className="pt-4 space-y-2">
-                      <Button className="w-full" variant="outline">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Kalender verbinden
-                      </Button>
-                      <Button className="w-full" variant="outline">
-                        <Mail className="h-4 w-4 mr-2" />
-                        E-Mail Setup
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                <CalendarIntegration />
+                <EmailSetup />
+              </div>
             </div>
           </TabsContent>
 

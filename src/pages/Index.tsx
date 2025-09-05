@@ -12,28 +12,30 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <Hero />
-      <Features />
-      
-      <section id="demo" className="py-24 bg-gradient-to-br from-background via-card/30 to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Testen Sie CarBot <span className="bg-gradient-carbot bg-clip-text text-transparent">live</span>
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Erleben Sie die Zukunft der Automotive-Kundenbetreuung. Unser AI-Chatbot versteht 
-              Fahrzeugprobleme, erstellt Kostenvoranschläge und bucht Termine automatisch.
-            </p>
+      <main>
+        <Hero />
+        <Features />
+        
+        <section id="demo" className="py-24 bg-gradient-to-br from-background via-card/30 to-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                Testen Sie CarBot <span className="bg-gradient-carbot bg-clip-text text-transparent">live</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Erleben Sie die Zukunft der Automotive-Kundenbetreuung. Unser AI-Chatbot versteht 
+                Fahrzeugprobleme, erstellt Kostenvoranschläge und bucht Termine automatisch.
+              </p>
+            </div>
+            
+            <ChatBot />
           </div>
-          
-          <ChatBot />
-        </div>
-      </section>
+        </section>
 
-      <Pricing />
-      <Testimonials />
-      <FAQ />
+        <Pricing />
+        <Testimonials />
+        <FAQ />
+      </main>
       <Footer />
       
       <Toaster />
