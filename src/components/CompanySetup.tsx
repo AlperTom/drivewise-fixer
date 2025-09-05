@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCompany, Company, Service, PricingRule, QuickAction } from '@/hooks/useCompany';
 import { ServiceTemplateSelector } from './ServiceTemplateSelector';
 import { defaultQuickActions } from '@/data/serviceTemplates';
+import { sanitizeTextInput, sanitizeEmail, sanitizePhone, sanitizeUrl } from '@/lib/sanitization';
 
 const CompanySetup = () => {
   const { toast } = useToast();
@@ -102,7 +103,38 @@ const CompanySetup = () => {
 
   // Handle company save
   const handleCompanySave = async () => {
-    const success = await saveCompany(companyForm);
+    // Sanitize form inputs before saving
+    const sanitizedData = {
+      ...companyForm,
+      company_name: sanitizeTextInput(companyForm.company_name || ''),
+      description: sanitizeTextInput(companyForm.description || ''),
+      address: sanitizeTextInput(companyForm.address || ''),
+      phone: sanitizePhone(companyForm.phone || ''),
+      email: sanitizeEmail(companyForm.email || ''),
+      website: companyForm.website ? sanitizeUrl(companyForm.website) : '',
+      specialties: companyForm.specialties?.map(s => sanitizeTextInput(s)).filter(Boolean) || []
+    };
+
+    // Validate critical fields after sanitization
+    if (!sanitizedData.company_name) {
+      toast({
+        title: 'Fehler',
+        description: 'Firmenname ist erforderlich.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (sanitizedData.email && !sanitizedData.email.includes('@')) {
+      toast({
+        title: 'Fehler',
+        description: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const success = await saveCompany(sanitizedData);
     if (success) {
       toast({
         title: 'Erfolg',
@@ -113,7 +145,25 @@ const CompanySetup = () => {
 
   // Handle service save
   const handleServiceSave = async () => {
-    const success = await saveService(editingService ? { ...serviceForm, id: editingService.id } : serviceForm);
+    // Sanitize service form inputs
+    const sanitizedServiceForm = {
+      ...serviceForm,
+      service_name: sanitizeTextInput(serviceForm.service_name || ''),
+      description: sanitizeTextInput(serviceForm.description || ''),
+      service_details: sanitizeTextInput(serviceForm.service_details || ''),
+    };
+
+    // Validate required fields
+    if (!sanitizedServiceForm.service_name) {
+      toast({
+        title: 'Fehler',
+        description: 'Service-Name ist erforderlich.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const success = await saveService(editingService ? { ...sanitizedServiceForm, id: editingService.id } : sanitizedServiceForm);
     if (success) {
       setServiceForm({
         service_name: '',

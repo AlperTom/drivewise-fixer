@@ -545,6 +545,36 @@ export type Database = {
           },
         ]
       }
+      security_audit: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          widget_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          widget_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          widget_id?: string | null
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string
@@ -710,6 +740,16 @@ export type Database = {
           data_field: string
         }
         Returns: string
+      }
+      validate_widget_api_key: {
+        Args: { api_key_input: string }
+        Returns: {
+          company_id: string
+          company_name: string
+          settings: Json
+          theme: Json
+          widget_id: string
+        }[]
       }
     }
     Enums: {

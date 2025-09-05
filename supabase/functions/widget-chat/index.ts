@@ -12,6 +12,41 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// Rate limiting store
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Input sanitization function
+function sanitizeInput(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+    .replace(/<[^>]*>/g, '') // Remove all HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .replace(/[^\w\s\-.,!?äöüßÄÖÜ@()]/g, '') // Allow only safe characters including German umlauts
+    .trim()
+    .slice(0, 2000); // Limit message length
+}
+
+// Rate limiting function
+function checkRateLimit(identifier: string, limit: number = 10, windowMs: number = 60000): boolean {
+  const now = Date.now();
+  
+  const current = rateLimitStore.get(identifier);
+  
+  if (!current || now > current.resetTime) {
+    rateLimitStore.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (current.count >= limit) {
+    return false;
+  }
+  
+  current.count++;
+  return true;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -19,63 +54,141 @@ serve(async (req) => {
   }
 
   try {
-    const widgetKey = req.headers.get('x-widget-key');
-    if (!widgetKey) {
-      return new Response(JSON.stringify({ error: 'Widget key required' }), {
+    const body = await req.json();
+    const clientIP = req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown';
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+
+    // Rate limiting - 5 messages per minute per session/IP
+    const rateLimitKey = body.sessionId || clientIP;
+    if (!checkRateLimit(rateLimitKey, 5, 60000)) {
+      console.warn(`Rate limit exceeded for: ${rateLimitKey}`);
+      return new Response(JSON.stringify({ 
+        error: 'Rate limit exceeded',
+        response: 'Sie senden zu viele Nachrichten. Bitte warten Sie einen Moment und versuchen Sie es erneut.'
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Sanitize inputs
+    const message = sanitizeInput(body.message || '');
+    const sessionId = sanitizeInput(body.sessionId || '');
+    const widgetKey = sanitizeInput(req.headers.get('x-widget-key') || '');
+    const visitorData = {
+      ...body.visitorData,
+      email: body.visitorData?.email ? sanitizeInput(body.visitorData.email) : undefined,
+      phone: body.visitorData?.phone ? sanitizeInput(body.visitorData.phone) : undefined,
+      name: body.visitorData?.name ? sanitizeInput(body.visitorData.name) : undefined
+    };
+    const conversationHistory = body.conversationHistory || [];
+
+    // Validate inputs
+    if (!widgetKey || widgetKey.length < 10) {
+      console.warn(`Invalid widget key from IP: ${clientIP}`);
+      return new Response(JSON.stringify({ 
+        error: 'Widget key required',
+        response: 'Entschuldigung, es gab ein technisches Problem. Bitte versuchen Sie es später erneut.'
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Verify widget exists and is active
-    const { data: widget, error: widgetError } = await supabase
-      .from('widget_configs')
-      .select(`
-        *,
-        companies (
-          id,
-          company_name,
-          business_type,
-          address,
-          phone,
-          email,
-          description,
-          specialties,
-          services (
-            id,
-            service_name,
-            description,
-            category,
-            estimated_duration,
-            pricing_rules (*)
-          ),
-          quick_actions (
-            id,
-            action_text,
-            action_type,
-            message_template,
-            icon_name,
-            display_order
-          )
-        )
-      `)
-      .eq('api_key', widgetKey)
-      .eq('is_active', true)
-      .single();
-
-    if (widgetError || !widget) {
-      console.error('Widget verification failed:', widgetError);
-      return new Response(JSON.stringify({ error: 'Invalid widget key' }), {
-        status: 401,
+    if (!message || message.length < 1) {
+      return new Response(JSON.stringify({ 
+        error: 'Message required',
+        response: 'Bitte geben Sie eine Nachricht ein.'
+      }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { message, sessionId, visitorData, conversationHistory } = await req.json();
+    // Use secure API key validation function
+    const { data: widgetConfig, error: widgetError } = await supabase
+      .rpc('validate_widget_api_key', { api_key_input: widgetKey });
+
+    if (widgetError || !widgetConfig || widgetConfig.length === 0) {
+      console.warn('Widget not found for key:', widgetKey.slice(0, 8) + '***');
+      
+      // Log security event
+      await supabase.from('security_audit').insert({
+        event_type: 'unauthorized_chat_attempt',
+        ip_address: clientIP,
+        user_agent: userAgent,
+        details: { key_prefix: widgetKey.slice(0, 5), message_preview: message.slice(0, 50) }
+      });
+
+      return new Response(JSON.stringify({ 
+        error: 'Widget not found',
+        response: 'Entschuldigung, dieser Chat-Service ist momentan nicht verfügbar.'
+      }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const widget = {
+      id: widgetConfig[0].widget_id,
+      company_id: widgetConfig[0].company_id,
+      theme: widgetConfig[0].theme,
+      settings: widgetConfig[0].settings
+    };
+
+    // Get company and services data
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select(`
+        id,
+        company_name,
+        business_type,
+        address,
+        phone,
+        email,
+        description,
+        specialties,
+        services (
+          id,
+          service_name,
+          description,
+          category,
+          estimated_duration,
+          pricing_rules (*)
+        ),
+        quick_actions (
+          id,
+          action_text,
+          action_type,
+          message_template,
+          icon_name,
+          display_order
+        )
+      `)
+      .eq('id', widget.company_id)
+      .single();
+
+    if (companyError || !company) {
+      console.error('Company not found:', companyError);
+      return new Response(JSON.stringify({ 
+        error: 'Company not found',
+        response: 'Entschuldigung, es gab ein Problem beim Laden der Firmeninformationen.'
+      }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     console.log('Processing chat message for widget:', widget.id);
 
-    const company = widget.companies;
+    // Log chat interaction
+    await supabase.from('security_audit').insert({
+      event_type: 'chat_message_processed',
+      widget_id: widget.id,
+      ip_address: clientIP,
+      user_agent: userAgent,
+      details: { message_length: message.length, has_visitor_data: !!visitorData.email }
+    });
 
     // Get OpenAI API key
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
