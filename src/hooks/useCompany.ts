@@ -246,7 +246,19 @@ export const useCompany = () => {
       if (company) {
         const { error } = await supabase
           .from('companies')
-          .update(companyData)
+          .update({
+            company_name: companyData.company_name,
+            business_type: companyData.business_type,
+            address: companyData.address,
+            phone: companyData.phone,
+            email: companyData.email,
+            website: companyData.website,
+            logo_url: companyData.logo_url,
+            brand_colors: companyData.brand_colors,
+            description: companyData.description,
+            specialties: companyData.specialties,
+            business_hours: companyData.business_hours
+          })
           .eq('id', company.id);
 
         if (error) throw error;
@@ -301,7 +313,17 @@ export const useCompany = () => {
       if (serviceData.id) {
         const { error } = await supabase
           .from('services')
-          .update(serviceData)
+          .update({
+            service_name: serviceData.service_name,
+            description: serviceData.description,
+            category: serviceData.category,
+            estimated_duration: serviceData.estimated_duration,
+            requires_appointment: serviceData.requires_appointment,
+            service_details: serviceData.service_details,
+            prerequisites: serviceData.prerequisites,
+            is_active: serviceData.is_active,
+            display_order: serviceData.display_order
+          })
           .eq('id', serviceData.id);
 
         if (error) throw error;
@@ -352,7 +374,13 @@ export const useCompany = () => {
       if (pricingData.id) {
         const { error } = await supabase
           .from('pricing_rules')
-          .update(pricingData)
+          .update({
+            car_type: pricingData.car_type,
+            base_price: pricingData.base_price,
+            max_price: pricingData.max_price,
+            pricing_type: pricingData.pricing_type,
+            additional_notes: pricingData.additional_notes
+          })
           .eq('id', pricingData.id);
 
         if (error) throw error;
@@ -396,7 +424,14 @@ export const useCompany = () => {
       if (actionData.id) {
         const { error } = await supabase
           .from('quick_actions')
-          .update(actionData)
+          .update({
+            action_text: actionData.action_text,
+            action_type: actionData.action_type,
+            message_template: actionData.message_template,
+            icon_name: actionData.icon_name,
+            display_order: actionData.display_order,
+            is_active: actionData.is_active
+          })
           .eq('id', actionData.id);
 
         if (error) throw error;
