@@ -36,18 +36,26 @@ serve(async (req) => {
           id,
           company_name,
           business_type,
+          address,
+          phone,
+          email,
+          description,
+          specialties,
           services (
             id,
             service_name,
             description,
             category,
-            estimated_duration
+            estimated_duration,
+            pricing_rules (*)
           ),
           quick_actions (
             id,
             action_text,
             action_type,
-            message_template
+            message_template,
+            icon_name,
+            display_order
           )
         )
       `)
@@ -63,60 +71,126 @@ serve(async (req) => {
       });
     }
 
-    const { message, sessionId, visitorData } = await req.json();
+    const { message, sessionId, visitorData, conversationHistory } = await req.json();
 
     console.log('Processing chat message for widget:', widget.id);
 
-    // Generate AI response based on company data
-    const companyContext = `
-      Company: ${widget.companies.company_name}
-      Business Type: ${widget.companies.business_type}
-      
-      Available Services:
-      ${widget.companies.services?.map(s => `- ${s.service_name}: ${s.description}`).join('\n') || 'No services configured'}
-      
-      Quick Actions:
-      ${widget.companies.quick_actions?.map(a => `- ${a.action_text}`).join('\n') || 'No quick actions configured'}
-    `;
+    const company = widget.companies;
 
-    // Simple AI response (in production, you'd use OpenAI or similar)
-    let response = '';
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('hallo') || lowerMessage.includes('hi') || message === '') {
-      response = widget.settings?.welcomeMessage || `Hallo! Willkommen bei ${widget.companies.company_name}. Wie kann ich Ihnen heute helfen?`;
-    } else if (lowerMessage.includes('service') || lowerMessage.includes('angebot')) {
-      const services = widget.companies.services || [];
-      if (services.length > 0) {
-        response = `Gerne! Wir bieten folgende Services an:\n\n${services.map(s => `• ${s.service_name} - ${s.description}`).join('\n')}\n\nWelcher Service interessiert Sie?`;
-      } else {
-        response = 'Gerne helfe ich Ihnen weiter! Können Sie mir mehr über Ihren Bedarf erzählen?';
-      }
-    } else if (lowerMessage.includes('preis') || lowerMessage.includes('kosten')) {
-      response = `Für ein genaues Angebot benötige ich etwas mehr Informationen über Ihr Fahrzeug und den gewünschten Service. Können Sie mir Ihr Fahrzeugmodell und das Problem beschreiben?`;
-    } else if (lowerMessage.includes('termin')) {
-      response = `Sehr gerne können wir einen Termin vereinbaren! Wann würde es Ihnen am besten passen? Ich kann Ihnen auch direkt unsere Kontaktdaten geben.`;
-    } else if (lowerMessage.includes('kontakt') || lowerMessage.includes('telefon')) {
-      response = `Sie erreichen uns unter:\n📞 ${widget.companies.phone || 'Telefonnummer nicht hinterlegt'}\n📧 ${widget.companies.email || 'E-Mail nicht hinterlegt'}\n\nOder hinterlassen Sie mir Ihre Kontaktdaten für einen Rückruf!`;
-    } else {
-      response = `Vielen Dank für Ihre Nachricht! Ich leite Ihre Anfrage gerne an unser Team weiter. Können Sie mir Ihre Kontaktdaten hinterlassen, damit wir uns bei Ihnen melden können?`;
+    // Get OpenAI API key
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      console.error('OpenAI API key not found');
+      return new Response(JSON.stringify({ error: 'AI service not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    // Create comprehensive system prompt
+    const systemPrompt = `Sie sind ein freundlicher und professioneller ChatBot für ${company?.company_name}, ein${company?.business_type === 'werkstatt' ? 'e Autowerkstatt' : 
+      company?.business_type === 'detailing' ? ' Autoaufbereitungsbetrieb' :
+      company?.business_type === 'cleaning' ? 'e Autoreinigungsfirma' :
+      company?.business_type === 'dealership' ? ' Autohaus' : 'er Automobilbetrieb'}.
+
+FIRMENINFORMATIONEN:
+- Name: ${company?.company_name}
+- Adresse: ${company?.address || 'Nicht angegeben'}
+- Telefon: ${company?.phone || 'Nicht angegeben'}
+- Email: ${company?.email || 'Nicht angegeben'}
+- Beschreibung: ${company?.description || 'Professionelle Automobildienstleistungen'}
+- Spezialisierungen: ${company?.specialties?.join(', ') || 'Allgemeine Fahrzeugwartung'}
+
+VERFÜGBARE SERVICES:
+${company?.services?.map(service => {
+  const pricingInfo = service.pricing_rules?.length > 0 
+    ? service.pricing_rules.map(rule => 
+        `${rule.car_type}: ${rule.pricing_type === 'fixed' ? rule.base_price + '€' : 
+          rule.pricing_type === 'range' ? rule.base_price + '€ - ' + rule.max_price + '€' : 
+          'auf Anfrage'}`
+      ).join(', ')
+    : 'Preise auf Anfrage';
+  
+  return `• ${service.service_name}: ${service.description} (${service.estimated_duration} Min) - ${pricingInfo}`;
+}).join('\n') || 'Verschiedene Automobildienstleistungen verfügbar'}
+
+VERHALTEN:
+- Antworten Sie immer auf Deutsch
+- Seien Sie freundlich und hilfsbereit
+- Bieten Sie konkrete Services und Preise an
+- Fragen Sie nach Fahrzeugdetails wenn nötig (Marke, Modell, Baujahr)
+- Helfen Sie bei Terminvereinbarungen
+- Geben Sie Kontaktinformationen bei Bedarf weiter
+- Bei technischen Fragen: Empfehlen Sie eine Vor-Ort-Diagnose
+- Antworten Sie präzise und strukturiert (max. 3-4 Sätze)
+- Verwenden Sie Emojis sparsam aber passend
+
+Aktuelle Unterhaltung mit dem Kunden:`;
+
+    // Prepare conversation messages for OpenAI
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...(conversationHistory || []).slice(-8), // Keep last 8 messages for context
+      { role: 'user', content: message }
+    ];
+
+    console.log('Sending request to OpenAI with', messages.length, 'messages');
+
+    // Call OpenAI API
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-2025-08-07',
+        messages: messages,
+        max_completion_tokens: 800,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!openaiResponse.ok) {
+      const errorData = await openaiResponse.text();
+      console.error('OpenAI API error:', errorData);
+      
+      // Fallback response
+      const fallbackResponse = `Entschuldigung, ich habe gerade technische Probleme. Bitte rufen Sie uns direkt an: ${company?.phone || 'Telefonnummer auf der Website'} oder schreiben Sie an: ${company?.email || 'E-Mail auf der Website'}`;
+      
+      return new Response(JSON.stringify({ 
+        response: fallbackResponse,
+        widget_config: widget.theme,
+        quick_actions: company?.quick_actions || [],
+        collect_email: widget.settings?.collectEmail || false,
+        collect_phone: widget.settings?.collectPhone || false
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const aiData = await openaiResponse.json();
+    const aiResponse = aiData.choices[0]?.message?.content || 'Entschuldigung, ich konnte Ihre Anfrage nicht verarbeiten.';
+
+    console.log('AI response generated:', aiResponse.substring(0, 100) + '...');
 
     // Store conversation
     try {
+      const conversationData = {
+        messages: [
+          ...(conversationHistory || []),
+          { role: 'user', content: message, timestamp: new Date().toISOString() },
+          { role: 'assistant', content: aiResponse, timestamp: new Date().toISOString() }
+        ].slice(-20) // Keep last 20 messages
+      };
+
       const { error: conversationError } = await supabase
         .from('widget_conversations')
         .upsert({
           widget_id: widget.id,
           session_id: sessionId,
           visitor_data: visitorData || {},
-          conversation_data: {
-            messages: [{
-              timestamp: new Date().toISOString(),
-              user_message: message,
-              bot_response: response
-            }]
-          },
+          conversation_data: conversationData,
           status: 'active'
         }, {
           onConflict: 'session_id'
@@ -130,11 +204,12 @@ serve(async (req) => {
     }
 
     // Detect if this could be a lead
-    const isLead = lowerMessage.includes('termin') || 
-                   lowerMessage.includes('reparatur') || 
-                   lowerMessage.includes('problem') ||
-                   lowerMessage.includes('kosten') ||
-                   lowerMessage.includes('angebot');
+    const isLead = message.toLowerCase().includes('termin') || 
+                   message.toLowerCase().includes('reparatur') || 
+                   message.toLowerCase().includes('problem') ||
+                   message.toLowerCase().includes('kosten') ||
+                   message.toLowerCase().includes('angebot') ||
+                   message.toLowerCase().includes('service');
 
     if (isLead && visitorData?.email) {
       try {
@@ -142,7 +217,7 @@ serve(async (req) => {
         const { error: leadError } = await supabase
           .from('leads')
           .insert({
-            company_id: widget.companies.id,
+            company_id: company.id,
             session_id: sessionId,
             name: visitorData.name || 'Website Besucher',
             email: visitorData.email,
@@ -165,11 +240,17 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ 
-      response, 
+      response: aiResponse, 
       widget_config: widget.theme,
-      quick_actions: widget.companies.quick_actions || [],
+      quick_actions: company?.quick_actions?.sort((a, b) => a.display_order - b.display_order) || [],
       collect_email: widget.settings?.collectEmail || false,
-      collect_phone: widget.settings?.collectPhone || false
+      collect_phone: widget.settings?.collectPhone || false,
+      company: {
+        name: company?.company_name,
+        phone: company?.phone,
+        email: company?.email,
+        address: company?.address
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
