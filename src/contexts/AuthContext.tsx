@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 // Removed useToast to prevent circular dependency issues
+// Fixed circular dependency issue
 
 interface AuthContextType {
   user: User | null;
