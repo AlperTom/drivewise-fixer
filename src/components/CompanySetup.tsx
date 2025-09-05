@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Building2, 
   Settings, 
@@ -19,10 +20,13 @@ import {
   Save,
   Plus,
   Trash2,
-  Edit
+  Edit,
+  Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCompany, Company, Service, PricingRule, QuickAction } from '@/hooks/useCompany';
+import { ServiceTemplateSelector } from './ServiceTemplateSelector';
+import { defaultQuickActions } from '@/data/serviceTemplates';
 
 const CompanySetup = () => {
   const { toast } = useToast();
@@ -81,6 +85,9 @@ const CompanySetup = () => {
     base_price: 0,
     max_price: 0
   });
+
+  // Price visibility settings
+  const [showPricesInChat, setShowPricesInChat] = useState(true);
 
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -378,7 +385,7 @@ const CompanySetup = () => {
         {/* Services */}
         <TabsContent value="services">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card className="card-automotive">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Wrench className="h-5 w-5" />
@@ -438,7 +445,7 @@ const CompanySetup = () => {
                   />
                 </div>
 
-                <Button onClick={handleServiceSave} className="w-full">
+                <Button onClick={handleServiceSave} className="w-full btn-carbot">
                   <Save className="h-4 w-4 mr-2" />
                   {editingService ? 'Service aktualisieren' : 'Service speichern'}
                 </Button>
@@ -467,7 +474,7 @@ const CompanySetup = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-automotive">
               <CardHeader>
                 <CardTitle>Ihre Services</CardTitle>
               </CardHeader>
@@ -475,7 +482,7 @@ const CompanySetup = () => {
                 <ScrollArea className="h-96">
                   <div className="space-y-2">
                     {services.map((service) => (
-                      <div key={service.id} className="flex items-center justify-between p-3 border rounded">
+                      <div key={service.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <h4 className="font-medium">{service.service_name}</h4>
                           <p className="text-sm text-muted-foreground">{service.description}</p>
@@ -497,15 +504,83 @@ const CompanySetup = () => {
                     ))}
                   </div>
                 </ScrollArea>
+                
+                {services.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Noch keine Services hinzugefügt. Verwenden Sie die Service-Vorlagen oder erstellen Sie eigene.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
+
+          {/* Service Templates Section */}
+          {!editingService && (
+            <div className="mt-6">
+              <Card className="card-automotive">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Wrench className="h-5 w-5 text-primary" />
+                    <span>Service-Vorlagen</span>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Wählen Sie aus vorgefertigten Automotive-Services
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ServiceTemplateSelector 
+                    onSelectTemplate={(template) => {
+                      setServiceForm({
+                        service_name: template.service_name,
+                        description: template.description,
+                        category: template.category,
+                        estimated_duration: template.estimated_duration,
+                        requires_appointment: template.requires_appointment,
+                        service_details: template.service_details,
+                        is_active: true,
+                        display_order: services.length
+                      });
+                    }}
+                    existingServices={services}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
 
         {/* Pricing */}
         <TabsContent value="pricing">
           <div className="space-y-6">
-            <Card>
+            {/* Price Visibility Settings */}
+            <Card className="card-automotive">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Euro className="h-5 w-5" />
+                  <span>Preisanzeige-Einstellungen</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="show-prices-chat"
+                    checked={showPricesInChat}
+                    onCheckedChange={(checked) => setShowPricesInChat(checked === true)}
+                  />
+                  <Label htmlFor="show-prices-chat">
+                    Preise im ChatBot anzeigen
+                  </Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Wenn deaktiviert, werden Preise nicht automatisch im ChatBot gezeigt. 
+                  Kunden können trotzdem Kostenvoranschläge anfordern.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="card-automotive">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Euro className="h-5 w-5" />
@@ -601,7 +676,7 @@ const CompanySetup = () => {
                       )}
                     </div>
 
-                    <Button onClick={handlePricingSave} className="w-full">
+                    <Button onClick={handlePricingSave} className="w-full btn-carbot">
                       <Save className="h-4 w-4 mr-2" />
                       Preis speichern
                     </Button>
@@ -614,17 +689,17 @@ const CompanySetup = () => {
                         {carTypes.map((carType) => {
                           const pricing = getPricingForService(selectedService.id, carType.value);
                           return (
-                            <div key={carType.value} className="p-3 border rounded">
+                            <div key={carType.value} className="p-3 border rounded-lg">
                               <h5 className="font-medium">{carType.label}</h5>
                               {pricing ? (
                                 <div className="mt-2">
                                   {pricing.pricing_type === 'fixed' && (
-                                    <span className="text-lg font-semibold text-green-600">
+                                    <span className="text-lg font-semibold text-automotive-success">
                                       {pricing.base_price}€
                                     </span>
                                   )}
                                   {pricing.pricing_type === 'range' && (
-                                    <span className="text-lg font-semibold text-blue-600">
+                                    <span className="text-lg font-semibold text-primary">
                                       {pricing.base_price}€ - {pricing.max_price}€
                                     </span>
                                   )}
@@ -653,132 +728,191 @@ const CompanySetup = () => {
 
         {/* Quick Actions */}
         <TabsContent value="actions">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageSquare className="h-5 w-5" />
-                  <span>{editingQuickAction ? 'Schnellaktion bearbeiten' : 'Neue Schnellaktion'}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="action_text">Button-Text</Label>
-                  <Input
-                    id="action_text"
-                    value={quickActionForm.action_text}
-                    onChange={(e) => setQuickActionForm(prev => ({ ...prev, action_text: e.target.value }))}
-                    placeholder="z.B. Termin buchen"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="action_type">Aktionstyp</Label>
-                  <Select 
-                    value={quickActionForm.action_type} 
-                    onValueChange={(value) => setQuickActionForm(prev => ({ ...prev, action_type: value as any }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="message">Nachricht senden</SelectItem>
-                      <SelectItem value="calendar">Kalender öffnen</SelectItem>
-                      <SelectItem value="service_inquiry">Service anfragen</SelectItem>
-                      <SelectItem value="pricing">Preise anzeigen</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="icon_name">Symbol</Label>
-                  <Select 
-                    value={quickActionForm.icon_name} 
-                    onValueChange={(value) => setQuickActionForm(prev => ({ ...prev, icon_name: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {iconOptions.map((icon) => (
-                        <SelectItem key={icon.value} value={icon.value}>
-                          {icon.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="message_template">Nachrichtenvorlage</Label>
-                  <Textarea
-                    id="message_template"
-                    value={quickActionForm.message_template}
-                    onChange={(e) => setQuickActionForm(prev => ({ ...prev, message_template: e.target.value }))}
-                    placeholder="Die Nachricht, die gesendet wird, wenn der Button geklickt wird"
-                    rows={3}
-                  />
-                </div>
-
-                <Button onClick={handleQuickActionSave} className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  {editingQuickAction ? 'Schnellaktion aktualisieren' : 'Schnellaktion speichern'}
-                </Button>
-
-                {editingQuickAction && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setEditingQuickAction(null);
-                      setQuickActionForm({
-                        action_text: '',
-                        action_type: 'message',
-                        message_template: '',
-                        icon_name: 'wrench',
-                        display_order: quickActions.length,
-                        is_active: true
-                      });
-                    }}
-                    className="w-full"
-                  >
-                    Abbrechen
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Ihre Schnellaktionen</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-96">
-                  <div className="space-y-2">
-                    {quickActions.map((action) => (
-                      <div key={action.id} className="flex items-center justify-between p-3 border rounded">
-                        <div>
-                          <h4 className="font-medium">{action.action_text}</h4>
-                          <p className="text-sm text-muted-foreground">{action.message_template}</p>
-                          <Badge variant="outline" className="mt-1">
-                            {action.action_type}
-                          </Badge>
+          <div className="space-y-6">
+            {/* Default Quick Actions Section */}
+            {quickActions.length === 0 && (
+              <Card className="card-automotive border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Zap className="h-5 w-5 text-primary" />
+                    <span>Standard-Schnellaktionen</span>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Fügen Sie bewährte Schnellaktionen mit einem Klick hinzu
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {defaultQuickActions.slice(0, 6).map((action, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="justify-start h-auto p-4"
+                        onClick={async () => {
+                          const success = await saveQuickAction({
+                            action_text: action.action_text,
+                            action_type: action.action_type,
+                            message_template: action.message_template,
+                            icon_name: action.icon_name,
+                            display_order: index,
+                            is_active: true
+                          });
+                          if (success) {
+                            toast({
+                              title: 'Hinzugefügt',
+                              description: `"${action.action_text}" wurde hinzugefügt.`,
+                            });
+                          }
+                        }}
+                      >
+                        <div className="text-left">
+                          <div className="font-medium">{action.action_text}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {action.message_template?.slice(0, 50)}...
+                          </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingQuickAction(action);
-                            setQuickActionForm(action);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      </Button>
                     ))}
                   </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="card-automotive">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <MessageSquare className="h-5 w-5" />
+                    <span>{editingQuickAction ? 'Schnellaktion bearbeiten' : 'Neue Schnellaktion'}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="action_text">Button-Text</Label>
+                    <Input
+                      id="action_text"
+                      value={quickActionForm.action_text}
+                      onChange={(e) => setQuickActionForm(prev => ({ ...prev, action_text: e.target.value }))}
+                      placeholder="z.B. Termin buchen"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="action_type">Aktionstyp</Label>
+                    <Select 
+                      value={quickActionForm.action_type} 
+                      onValueChange={(value) => setQuickActionForm(prev => ({ ...prev, action_type: value as any }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="message">Nachricht senden</SelectItem>
+                        <SelectItem value="calendar">Kalender öffnen</SelectItem>
+                        <SelectItem value="service_inquiry">Service anfragen</SelectItem>
+                        <SelectItem value="pricing">Preise anzeigen</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="icon_name">Symbol</Label>
+                    <Select 
+                      value={quickActionForm.icon_name} 
+                      onValueChange={(value) => setQuickActionForm(prev => ({ ...prev, icon_name: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {iconOptions.map((icon) => (
+                          <SelectItem key={icon.value} value={icon.value}>
+                            {icon.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message_template">Nachrichtenvorlage</Label>
+                    <Textarea
+                      id="message_template"
+                      value={quickActionForm.message_template}
+                      onChange={(e) => setQuickActionForm(prev => ({ ...prev, message_template: e.target.value }))}
+                      placeholder="Die Nachricht, die gesendet wird, wenn der Button geklickt wird"
+                      rows={3}
+                    />
+                  </div>
+
+                  <Button onClick={handleQuickActionSave} className="w-full btn-carbot">
+                    <Save className="h-4 w-4 mr-2" />
+                    {editingQuickAction ? 'Schnellaktion aktualisieren' : 'Schnellaktion speichern'}
+                  </Button>
+
+                  {editingQuickAction && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setEditingQuickAction(null);
+                        setQuickActionForm({
+                          action_text: '',
+                          action_type: 'message',
+                          message_template: '',
+                          icon_name: 'wrench',
+                          display_order: quickActions.length,
+                          is_active: true
+                        });
+                      }}
+                      className="w-full"
+                    >
+                      Abbrechen
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="card-automotive">
+                <CardHeader>
+                  <CardTitle>Ihre Schnellaktionen</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-96">
+                    <div className="space-y-2">
+                      {quickActions.map((action) => (
+                        <div key={action.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{action.action_text}</h4>
+                            <p className="text-sm text-muted-foreground">{action.message_template?.slice(0, 50)}...</p>
+                            <Badge variant="outline" className="mt-1">
+                              {action.action_type}
+                            </Badge>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingQuickAction(action);
+                              setQuickActionForm(action);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  
+                  {quickActions.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        Noch keine Schnellaktionen hinzugefügt. Verwenden Sie die Standard-Vorlagen oder erstellen Sie eigene.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
