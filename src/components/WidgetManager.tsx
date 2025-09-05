@@ -36,6 +36,7 @@ interface WidgetConfig {
     textColor: string;
     borderRadius: string;
     position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+    logoUrl?: string;
   };
   settings: {
     showBranding: boolean;
@@ -64,7 +65,8 @@ const WidgetManager = () => {
       backgroundColor: '#ffffff',
       textColor: '#1f2937',
       borderRadius: '12px',
-      position: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
+      position: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left',
+      logoUrl: ''
     },
     settings: {
       showBranding: true,
@@ -153,7 +155,8 @@ const WidgetManager = () => {
           backgroundColor: '#ffffff',
           textColor: '#1f2937',
           borderRadius: '12px',
-          position: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
+          position: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left',
+          logoUrl: ''
         },
         settings: {
           showBranding: true,
@@ -290,7 +293,14 @@ chatbot.init();`;
     if (selectedWidget) {
       setWidgetForm({
         widget_name: selectedWidget.widget_name,
-        theme: selectedWidget.theme,
+        theme: {
+          primaryColor: selectedWidget.theme.primaryColor,
+          backgroundColor: selectedWidget.theme.backgroundColor,
+          textColor: selectedWidget.theme.textColor,
+          borderRadius: selectedWidget.theme.borderRadius,
+          position: selectedWidget.theme.position,
+          logoUrl: selectedWidget.theme.logoUrl || ''
+        },
         settings: selectedWidget.settings
       });
     }
@@ -507,7 +517,7 @@ chatbot.init();`;
                         />
                       </div>
 
-                      <div>
+                       <div>
                         <Label>Position</Label>
                         <select
                           value={widgetForm.theme.position}
@@ -523,6 +533,22 @@ chatbot.init();`;
                           <option value="top-left">Oben links</option>
                         </select>
                       </div>
+                    </div>
+
+                    <div className="col-span-2">
+                      <Label>Custom Logo URL (optional)</Label>
+                      <Input
+                        type="url"
+                        value={widgetForm.theme.logoUrl || ''}
+                        onChange={(e) => setWidgetForm(prev => ({
+                          ...prev,
+                          theme: { ...prev.theme, logoUrl: e.target.value }
+                        }))}
+                        placeholder="https://ihr-logo.com/logo.png"
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Lassen Sie das Feld leer um das CarBot Standard-Logo zu verwenden
+                      </p>
                     </div>
 
                     <Button onClick={updateWidget} className="w-full">
