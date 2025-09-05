@@ -7,8 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import carbotLogo from '@/assets/carbot-logo-horizontal.png';
+import { Loader2, Mail, Lock, User, Eye, EyeOff, Car } from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -91,11 +90,15 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-6">
-            <img 
-              src={carbotLogo} 
-              alt="CarBot Logo" 
-              className="h-16 w-auto object-contain"
-            />
+            <div className="flex items-center space-x-2">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600">
+                <Car className="h-8 w-8 text-white" />
+              </div>
+              <span className="text-3xl font-bold">
+                <span className="text-foreground">Car</span>
+                <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">Bot</span>
+              </span>
+            </div>
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to CarBot</CardTitle>
           <CardDescription>
