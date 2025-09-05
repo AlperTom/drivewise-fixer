@@ -70,11 +70,11 @@ const LeadDashboard = () => {
     return true;
   });
 
-  // Get lead score color
+  // Get lead score color using semantic tokens
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-red-600 bg-red-50 border-red-200';
-    if (score >= 60) return 'text-orange-600 bg-orange-50 border-orange-200';
-    return 'text-blue-600 bg-blue-50 border-blue-200';
+    if (score >= 80) return 'text-destructive bg-destructive/5 border-destructive/20';
+    if (score >= 60) return 'text-automotive-warning bg-automotive-warning/10 border-automotive-warning/20';
+    return 'text-automotive-blue bg-automotive-blue/10 border-automotive-blue/20';
   };
 
   // Get lead score label
@@ -160,9 +160,9 @@ const LeadDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Neue Leads</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.new}</p>
+                <p className="text-2xl font-bold text-automotive-blue">{stats.new}</p>
               </div>
-              <UserCheck className="h-8 w-8 text-blue-600" />
+              <UserCheck className="h-8 w-8 text-automotive-blue" />
             </div>
           </CardContent>
         </Card>
@@ -172,9 +172,9 @@ const LeadDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Hot Leads</p>
-                <p className="text-2xl font-bold text-red-600">{stats.hot}</p>
+                <p className="text-2xl font-bold text-destructive">{stats.hot}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-red-600" />
+              <TrendingUp className="h-8 w-8 text-destructive" />
             </div>
           </CardContent>
         </Card>
@@ -184,9 +184,9 @@ const LeadDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Warm Leads</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.warm}</p>
+                <p className="text-2xl font-bold text-automotive-warning">{stats.warm}</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
+              <Clock className="h-8 w-8 text-automotive-warning" />
             </div>
           </CardContent>
         </Card>
@@ -196,9 +196,9 @@ const LeadDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Konvertiert</p>
-                <p className="text-2xl font-bold text-green-600">{stats.converted}</p>
+                <p className="text-2xl font-bold text-automotive-success">{stats.converted}</p>
               </div>
-              <Trophy className="h-8 w-8 text-green-600" />
+              <Trophy className="h-8 w-8 text-automotive-success" />
             </div>
           </CardContent>
         </Card>

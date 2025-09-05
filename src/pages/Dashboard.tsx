@@ -116,9 +116,9 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Hot Leads</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.hot}</p>
+                    <p className="text-2xl font-bold text-destructive">{stats.hot}</p>
                   </div>
-                  <BarChart3 className="h-8 w-8 text-red-600" />
+                  <BarChart3 className="h-8 w-8 text-destructive" />
                 </div>
               </CardContent>
             </Card>
@@ -140,9 +140,9 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Konversionen</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.converted}</p>
+                    <p className="text-2xl font-bold text-automotive-success">{stats.converted}</p>
                   </div>
-                  <MessageSquare className="h-8 w-8 text-green-600" />
+                  <MessageSquare className="h-8 w-8 text-automotive-success" />
                 </div>
               </CardContent>
             </Card>

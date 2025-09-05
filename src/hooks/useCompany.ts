@@ -173,7 +173,8 @@ export const useCompany = () => {
 
       setCompany(data ? convertCompanyRow(data) : null);
     } catch (error) {
-      console.error('Error fetching company:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Firma konnte nicht geladen werden.',
@@ -197,7 +198,8 @@ export const useCompany = () => {
       if (error) throw error;
       setServices(data ? data.map(convertServiceRow) : []);
     } catch (error) {
-      console.error('Error fetching services:', error);
+      // Services are not critical for app functionality, silently handle error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     }
   };
 
@@ -215,7 +217,8 @@ export const useCompany = () => {
       if (error) throw error;
       setPricingRules(data ? data.map(convertPricingRuleRow) : []);
     } catch (error) {
-      console.error('Error fetching pricing rules:', error);
+      // Pricing rules are not critical for app functionality, silently handle error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     }
   };
 
@@ -234,7 +237,8 @@ export const useCompany = () => {
       if (error) throw error;
       setQuickActions(data ? data.map(convertQuickActionRow) : []);
     } catch (error) {
-      console.error('Error fetching quick actions:', error);
+      // Quick actions are not critical for app functionality, silently handle error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     }
   };
 
@@ -295,7 +299,8 @@ export const useCompany = () => {
       
       return true;
     } catch (error) {
-      console.error('Error saving company:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Firmendaten konnten nicht gespeichert werden.',
@@ -358,7 +363,8 @@ export const useCompany = () => {
       
       return true;
     } catch (error) {
-      console.error('Error saving service:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Service konnte nicht gespeichert werden.',
@@ -406,7 +412,8 @@ export const useCompany = () => {
 
       return true;
     } catch (error) {
-      console.error('Error saving pricing rule:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Preis konnte nicht gespeichert werden.',
@@ -463,7 +470,8 @@ export const useCompany = () => {
       
       return true;
     } catch (error) {
-      console.error('Error saving quick action:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Schnellaktion konnte nicht gespeichert werden.',
@@ -559,7 +567,8 @@ export const useCompany = () => {
           setQuickActions([]);
         }
       } catch (error) {
-        console.error('Error fetching company data:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
         toast({
           title: 'Fehler',
           description: 'Daten konnten nicht geladen werden.',

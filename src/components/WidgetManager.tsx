@@ -95,7 +95,9 @@ const WidgetManager = () => {
         setSelectedWidget(data[0] as unknown as WidgetConfig);
       }
     } catch (error) {
-      console.error('Error fetching widgets:', error);
+      // Log error internally for debugging but don't expose details to user
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Widgets konnten nicht geladen werden.',
@@ -167,7 +169,8 @@ const WidgetManager = () => {
         }
       });
     } catch (error) {
-      console.error('Error creating widget:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Widget konnte nicht erstellt werden.',
@@ -200,7 +203,8 @@ const WidgetManager = () => {
 
       fetchWidgets();
     } catch (error) {
-      console.error('Error updating widget:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Widget konnte nicht aktualisiert werden.',
@@ -230,7 +234,8 @@ const WidgetManager = () => {
 
       fetchWidgets();
     } catch (error) {
-      console.error('Error regenerating API key:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'API-Schlüssel konnte nicht erneuert werden.',

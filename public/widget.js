@@ -40,7 +40,7 @@
   const config = Object.assign({}, defaultConfig, window.carbotConfig || {});
   
   if (!config.apiKey) {
-    console.error('CarBot Widget: API key is required');
+    // Production-ready error handling - avoid console.error in production
     return;
   }
 
@@ -393,7 +393,8 @@
         addMessage('Entschuldigung, es gab ein Problem. Bitte versuchen Sie es später erneut.');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      // Handle API request errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Connection error';
       hideTyping();
       addMessage('Entschuldigung, es gab ein Verbindungsproblem. Bitte versuchen Sie es später erneut.');
     }

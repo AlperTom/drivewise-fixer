@@ -266,7 +266,7 @@ export const useLeads = (companyId?: string) => {
 
       return lead;
     } catch (error) {
-      console.error('Error creating/updating lead:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return null;
     }
   };
@@ -295,7 +295,7 @@ export const useLeads = (companyId?: string) => {
       setActivities(prev => [convertLeadActivityRow(data), ...prev]);
       return true;
     } catch (error) {
-      console.error('Error adding activity:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return false;
     }
   };
@@ -314,7 +314,8 @@ export const useLeads = (companyId?: string) => {
       if (error) throw error;
       setLeads(data ? data.map(convertLeadRow) : []);
     } catch (error) {
-      console.error('Error fetching leads:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Leads konnten nicht geladen werden.',
@@ -346,7 +347,8 @@ export const useLeads = (companyId?: string) => {
       if (error) throw error;
       setActivities(data ? data.map(convertLeadActivityRow) : []);
     } catch (error) {
-      console.error('Error fetching activities:', error);
+      // Activities are not critical for app functionality, silently handle error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     }
   };
 
@@ -373,7 +375,8 @@ export const useLeads = (companyId?: string) => {
 
       return true;
     } catch (error) {
-      console.error('Error updating lead status:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       toast({
         title: 'Fehler',
         description: 'Lead-Status konnte nicht aktualisiert werden.',
