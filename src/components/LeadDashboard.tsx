@@ -243,7 +243,7 @@ const LeadDashboard = () => {
                       <SelectItem value="all">Alle Scores</SelectItem>
                       <SelectItem value="hot">Hot (80+)</SelectItem>
                       <SelectItem value="warm">Warm (60-79)</SelectItem>
-                      <SelectItem value="cold">Cold (<60)</SelectItem>
+                      <SelectItem value="cold">Cold (&lt;60)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -397,7 +397,7 @@ const LeadDashboard = () => {
                   <TabsContent value="activities" className="mt-4">
                     <ScrollArea className="h-80">
                       <div className="space-y-3">
-                      {leadActivities.map((activity) => (
+                        {leadActivities.map((activity) => (
                           <div key={activity.id} className="p-3 border rounded">
                             <div className="flex items-start justify-between mb-1">
                               <Badge variant="outline" className="text-xs">
