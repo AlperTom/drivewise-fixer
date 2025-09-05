@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCompany, Company, Service, QuickAction } from '@/hooks/useCompany';
 import { ServiceTemplateSelector } from './ServiceTemplateSelector';
 import { automotiveServiceTemplates, defaultQuickActions, ServiceTemplate } from '@/data/serviceTemplates';
+import { sanitizeTextInput, sanitizeEmail, sanitizePhone } from '@/lib/sanitization';
 
 interface QuickSetupWizardProps {
   onComplete?: () => void;
@@ -80,7 +81,27 @@ export const QuickSetupWizard: React.FC<QuickSetupWizardProps> = ({ onComplete }
 
   const handleNextStep = async () => {
     if (currentStep === 'company') {
-      const success = await saveCompany(companyForm);
+      // Sanitize company form data before saving
+      const sanitizedCompanyForm = {
+        ...companyForm,
+        company_name: sanitizeTextInput(companyForm.company_name || ''),
+        phone: sanitizePhone(companyForm.phone || ''),
+        email: sanitizeEmail(companyForm.email || ''),
+        address: sanitizeTextInput(companyForm.address || ''),
+        description: sanitizeTextInput(companyForm.description || '')
+      };
+
+      // Validate critical fields after sanitization
+      if (!sanitizedCompanyForm.company_name || !sanitizedCompanyForm.phone || !sanitizedCompanyForm.email) {
+        toast({
+          title: 'Fehler',
+          description: 'Bitte füllen Sie alle Pflichtfelder aus.',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const success = await saveCompany(sanitizedCompanyForm);
       if (success) {
         setCurrentStep('services');
       }

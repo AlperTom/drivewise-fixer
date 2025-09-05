@@ -17,6 +17,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeEmail, sanitizeTextInput } from '@/lib/sanitization';
 
 interface EmailSetupProps {
   onSetupComplete?: () => void;
@@ -57,8 +58,35 @@ Mit freundlichen Grüßen
   const handleSaveSettings = async () => {
     setIsSaving(true);
     
-    // Simulate save process
+    // Sanitize email settings before saving
+    const sanitizedSettings = {
+      ...emailSettings,
+      fromEmail: sanitizeEmail(emailSettings.fromEmail),
+      replyToEmail: sanitizeEmail(emailSettings.replyToEmail),
+      signatureName: sanitizeTextInput(emailSettings.signatureName)
+    };
+
+    const sanitizedTemplate = {
+      ...emailTemplate,
+      subject: sanitizeTextInput(emailTemplate.subject),
+      message: sanitizeTextInput(emailTemplate.message)
+    };
+
+    // Validate email addresses
+    if (!sanitizedSettings.fromEmail || !sanitizedSettings.replyToEmail) {
+      toast({
+        title: 'Fehler',
+        description: 'Bitte geben Sie gültige E-Mail-Adressen ein.',
+        variant: 'destructive'
+      });
+      setIsSaving(false);
+      return;
+    }
+    
+    // Simulate save process with sanitized data
     setTimeout(() => {
+      setEmailSettings(sanitizedSettings);
+      setEmailTemplate(sanitizedTemplate);
       setIsSaving(false);
       setIsSetup(true);
       toast({

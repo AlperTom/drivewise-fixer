@@ -723,6 +723,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      log_appointment_access: {
+        Args: {
+          p_action?: string
+          p_appointment_id: string
+          p_customer_email?: string
+          p_customer_phone?: string
+        }
+        Returns: undefined
+      }
       log_customer_access: {
         Args: {
           p_action?: string
@@ -733,6 +742,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      mask_appointment_data: {
+        Args: {
+          appointment_id: string
+          check_user_id: string
+          data_field: string
+        }
+        Returns: string
+      }
       mask_customer_data: {
         Args: {
           check_company_id: string
@@ -741,11 +758,26 @@ export type Database = {
         }
         Returns: string
       }
+      validate_appointment_access: {
+        Args: { appointment_id: string; user_id: string }
+        Returns: boolean
+      }
       validate_widget_api_key: {
         Args: { api_key_input: string }
         Returns: {
           company_id: string
           company_name: string
+          settings: Json
+          theme: Json
+          widget_id: string
+        }[]
+      }
+      validate_widget_api_key_secure: {
+        Args: { api_key_input: string; client_ip?: string }
+        Returns: {
+          company_id: string
+          company_name: string
+          rate_limited: boolean
           settings: Json
           theme: Json
           widget_id: string

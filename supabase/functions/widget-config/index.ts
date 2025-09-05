@@ -83,21 +83,16 @@ serve(async (req) => {
       });
     }
 
-    // Use secure API key validation function
+    // Use enhanced secure API key validation function with rate limiting
     const { data: widgetConfig, error: widgetError } = await supabase
-      .rpc('validate_widget_api_key', { api_key_input: widgetKey });
-
-    if (widgetError || !widgetConfig || widgetConfig.length === 0) {
-      console.warn('Widget not found for key:', widgetKey.slice(0, 8) + '***');
-      
-      // Log security event
-      await supabase.from('security_audit').insert({
-        event_type: 'widget_access_denied',
-        ip_address: clientIP,
-        user_agent: userAgent,
-        details: { key_prefix: widgetKey.slice(0, 5) }
+      .rpc('validate_widget_api_key_secure', { 
+        api_key_input: widgetKey,
+        client_ip: clientIP 
       });
 
+    if (widgetError || !widgetConfig || widgetConfig.length === 0) {
+      console.warn('Widget validation failed:', widgetError);
+      
       return new Response(JSON.stringify({ error: 'Widget not found or inactive' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -106,13 +101,17 @@ serve(async (req) => {
 
     const widget = widgetConfig[0];
 
-    // Log successful access
-    await supabase.from('security_audit').insert({
-      event_type: 'widget_config_accessed',
-      widget_id: widget.widget_id,
-      ip_address: clientIP,
-      user_agent: userAgent
-    });
+    // Check if rate limited by the database function
+    if (widget.rate_limited) {
+      console.warn(`Database rate limit exceeded for IP: ${clientIP}`);
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Security audit logging is now handled by the database function
+    console.log(`Widget config accessed for company: ${widget.company_name}`);
 
     return new Response(JSON.stringify({
       widget_id: widget.widget_id,
