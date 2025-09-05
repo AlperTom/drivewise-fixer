@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import carbotLogo from '@/assets/carbot-logo.png';
+import carbotLogo from '@/assets/carbot-logo-horizontal.png';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -94,7 +94,7 @@ const Auth = () => {
             <img 
               src={carbotLogo} 
               alt="CarBot Logo" 
-              className="h-16 w-16 object-contain"
+              className="h-16 w-auto object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to CarBot</CardTitle>
