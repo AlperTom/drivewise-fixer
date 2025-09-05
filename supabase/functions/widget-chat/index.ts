@@ -257,9 +257,10 @@ Aktuelle Unterhaltung mit dem Kunden:`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: messages,
-        max_completion_tokens: 800,
+        max_tokens: 800,
+        temperature: 0.7,
       }),
     });
 

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -25,12 +26,14 @@ declare global {
 }
 
 const WidgetDemo = () => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     // Load the widget script with demo configuration
     const script = document.createElement('script');
     script.innerHTML = `
       window.carbotConfig = {
-        apiKey: 'demo_key_12345',
+        apiKey: 'demo_key_12345_replace_with_real_key',
         theme: {
           primaryColor: '#f97316',
           backgroundColor: '#ffffff',
@@ -136,7 +139,7 @@ const WidgetDemo = () => {
               Widget öffnen
             </Button>
             
-            <Button variant="outline" className="bg-card/50 border-border hover:bg-card">
+            <Button variant="outline" className="bg-card/50 border-border hover:bg-card" onClick={() => navigate('/auth')}>
               <ExternalLink className="mr-2 h-4 w-4" />
               Zur Anmeldung
             </Button>
@@ -274,7 +277,7 @@ const WidgetDemo = () => {
                     Erstellen Sie in wenigen Minuten Ihren personalisierten CarBot 
                     und steigern Sie Ihre Konversionsrate um bis zu 300%.
                   </p>
-                  <Button className="btn-carbot text-white">
+                  <Button className="btn-carbot text-white" onClick={() => navigate('/auth')}>
                     Jetzt kostenlos starten
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
