@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+// Removed useToast to prevent circular dependency issues
 
 interface AuthContextType {
   user: User | null;
@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener
@@ -48,20 +47,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setLoading(false);
 
         if (event === 'SIGNED_IN') {
-          toast({
-            title: "Willkommen zurück!",
-            description: "Sie wurden erfolgreich angemeldet.",
-          });
+          // Toast will be handled by individual components
+          console.log('User signed in successfully');
           
           // Redirect to dashboard after successful login
           setTimeout(() => {
             window.location.href = '/dashboard';
           }, 1000);
         } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Abgemeldet",
-            description: "Sie wurden erfolgreich abgemeldet.",
-          });
+          console.log('User signed out successfully');
         }
       }
     );
@@ -74,7 +68,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [toast]);
+  }, []);
 
   const validatePassword = async (password: string, email?: string) => {
     try {
@@ -123,10 +117,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     if (!error) {
-      toast({
-        title: "Check your email",
-        description: "We've sent you a verification link to complete your registration.",
-      });
+      // Success toast will be handled by the Auth component
+      console.log('Verification email sent successfully');
     }
 
     return { error };
@@ -144,11 +136,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Failed to sign out:', error);
     }
   };
 

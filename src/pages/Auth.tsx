@@ -86,6 +86,11 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+    } else {
+      toast({
+        title: "Check your email",
+        description: "We've sent you a verification link to complete your registration.",
+      });
     }
     
     setIsLoading(false);
