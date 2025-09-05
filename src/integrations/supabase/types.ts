@@ -601,6 +601,93 @@ export type Database = {
           },
         ]
       }
+      widget_configs: {
+        Row: {
+          api_key: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          settings: Json
+          theme: Json
+          updated_at: string
+          widget_name: string
+        }
+        Insert: {
+          api_key: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          settings?: Json
+          theme?: Json
+          updated_at?: string
+          widget_name?: string
+        }
+        Update: {
+          api_key?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          settings?: Json
+          theme?: Json
+          updated_at?: string
+          widget_name?: string
+        }
+        Relationships: []
+      }
+      widget_conversations: {
+        Row: {
+          conversation_data: Json | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          session_id: string
+          status: string
+          updated_at: string
+          visitor_data: Json | null
+          widget_id: string
+        }
+        Insert: {
+          conversation_data?: Json | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          session_id: string
+          status?: string
+          updated_at?: string
+          visitor_data?: Json | null
+          widget_id: string
+        }
+        Update: {
+          conversation_data?: Json | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          session_id?: string
+          status?: string
+          updated_at?: string
+          visitor_data?: Json | null
+          widget_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "widget_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "widget_conversations_widget_id_fkey"
+            columns: ["widget_id"]
+            isOneToOne: false
+            referencedRelation: "widget_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

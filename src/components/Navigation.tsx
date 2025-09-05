@@ -43,20 +43,20 @@ const Navigation = () => {
         </div>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-            Features
-          </a>
-          <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-            Preise
-          </a>
-          <a href="#demo" className="text-muted-foreground hover:text-foreground transition-colors">
-            Live Demo
-          </a>
-          <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
-            Kontakt
-          </a>
-        </div>
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+              Features
+            </a>
+            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+              Preise
+            </a>
+            <a href="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
+              Live Demo
+            </a>
+            <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
+              Kontakt
+            </a>
+          </div>
 
         {/* User Menu */}
         <div className="flex items-center space-x-4">

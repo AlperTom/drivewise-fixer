@@ -64,7 +64,7 @@ const WidgetManager = () => {
       backgroundColor: '#ffffff',
       textColor: '#1f2937',
       borderRadius: '12px',
-      position: 'bottom-right' as const
+      position: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
     },
     settings: {
       showBranding: true,
@@ -81,16 +81,16 @@ const WidgetManager = () => {
 
     try {
       const { data, error } = await supabase
-        .from('widget_configs')
+        .from('widget_configs' as any)
         .select('*')
         .eq('company_id', company.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setWidgets(data || []);
+      setWidgets((data as unknown as WidgetConfig[]) || []);
       
       if (data && data.length > 0) {
-        setSelectedWidget(data[0]);
+        setSelectedWidget(data[0] as unknown as WidgetConfig);
       }
     } catch (error) {
       console.error('Error fetching widgets:', error);
@@ -130,15 +130,15 @@ const WidgetManager = () => {
       };
 
       const { data, error } = await supabase
-        .from('widget_configs')
+        .from('widget_configs' as any)
         .insert(newWidget)
         .select()
         .single();
 
       if (error) throw error;
 
-      setWidgets(prev => [data, ...prev]);
-      setSelectedWidget(data);
+      setWidgets(prev => [data as unknown as WidgetConfig, ...prev]);
+      setSelectedWidget(data as unknown as WidgetConfig);
       
       toast({
         title: 'Erfolg',
@@ -153,7 +153,7 @@ const WidgetManager = () => {
           backgroundColor: '#ffffff',
           textColor: '#1f2937',
           borderRadius: '12px',
-          position: 'bottom-right'
+          position: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
         },
         settings: {
           showBranding: true,
@@ -181,7 +181,7 @@ const WidgetManager = () => {
 
     try {
       const { error } = await supabase
-        .from('widget_configs')
+        .from('widget_configs' as any)
         .update({
           theme: widgetForm.theme,
           settings: widgetForm.settings
@@ -214,7 +214,7 @@ const WidgetManager = () => {
       const newApiKey = generateApiKey();
       
       const { error } = await supabase
-        .from('widget_configs')
+        .from('widget_configs' as any)
         .update({ api_key: newApiKey })
         .eq('id', selectedWidget.id);
 

@@ -11,11 +11,13 @@ import {
   Settings,
   Bot,
   Calendar,
-  Mail
+  Mail,
+  Globe
 } from 'lucide-react';
 import CompanySetup from '@/components/CompanySetup';
 import LeadDashboard from '@/components/LeadDashboard';
 import ChatBot from '@/components/ChatBot';
+import WidgetManager from '@/components/WidgetManager';
 import { useCompany } from '@/hooks/useCompany';
 import { useLeads } from '@/hooks/useLeads';
 
@@ -140,7 +142,7 @@ const Dashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue={isCompanySetup ? "overview" : "setup"} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span>Übersicht</span>
@@ -152,6 +154,10 @@ const Dashboard = () => {
             <TabsTrigger value="chatbot" className="flex items-center space-x-2">
               <Bot className="h-4 w-4" />
               <span>ChatBot</span>
+            </TabsTrigger>
+            <TabsTrigger value="widget" className="flex items-center space-x-2">
+              <Globe className="h-4 w-4" />
+              <span>Widget</span>
             </TabsTrigger>
             <TabsTrigger value="setup" className="flex items-center space-x-2">
               <Settings className="h-4 w-4" />
@@ -333,6 +339,11 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Widget Tab */}
+          <TabsContent value="widget">
+            <WidgetManager />
           </TabsContent>
 
           {/* Setup Tab */}
