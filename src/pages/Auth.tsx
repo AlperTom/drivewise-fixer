@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { Loader2, Mail, Lock, User, Eye, EyeOff, Car } from 'lucide-react';
 
 const Auth = () => {
@@ -27,7 +28,14 @@ const Auth = () => {
     password: '',
   });
   
-  const { user, signUp, signIn } = useAuth();
+  const [passwordValidation, setPasswordValidation] = useState<{
+    isValid: boolean;
+    errors: string[];
+    strength: 'weak' | 'medium' | 'strong';
+    isLeaked?: boolean;
+  } | null>(null);
+  
+  const { user, signUp, signIn, validatePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -36,6 +44,21 @@ const Auth = () => {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Validate password in real-time
+  useEffect(() => {
+    const validatePasswordAsync = async () => {
+      if (signUpData.password) {
+        const validation = await validatePassword(signUpData.password, signUpData.email);
+        setPasswordValidation(validation);
+      } else {
+        setPasswordValidation(null);
+      }
+    };
+
+    const timeoutId = setTimeout(validatePasswordAsync, 500); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [signUpData.password, signUpData.email, validatePassword]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,6 +212,10 @@ const Auth = () => {
                       required
                     />
                   </div>
+                  <PasswordStrengthMeter 
+                    password={signUpData.password} 
+                    validation={passwordValidation} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>

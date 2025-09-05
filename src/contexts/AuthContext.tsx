@@ -11,6 +11,12 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resendConfirmation: (email: string) => Promise<{ error: any }>;
+  validatePassword: (password: string, email?: string) => Promise<{
+    isValid: boolean;
+    errors: string[];
+    strength: 'weak' | 'medium' | 'strong';
+    isLeaked?: boolean;
+  }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,7 +76,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, [toast]);
 
+  const validatePassword = async (password: string, email?: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-password', {
+        body: { password, email }
+      });
+      
+      if (error) {
+        console.error('Password validation error:', error);
+        return {
+          isValid: false,
+          errors: ['Password validation service unavailable'],
+          strength: 'weak' as const
+        };
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Password validation error:', error);
+      return {
+        isValid: false,
+        errors: ['Password validation service unavailable'],
+        strength: 'weak' as const
+      };
+    }
+  };
+
   const signUp = async (email: string, password: string, fullName?: string) => {
+    // Validate password before attempting signup
+    const validation = await validatePassword(password, email);
+    if (!validation.isValid) {
+      return { error: { message: validation.errors.join('. ') } };
+    }
+    
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -136,6 +174,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signIn,
     signOut,
     resendConfirmation,
+    validatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
