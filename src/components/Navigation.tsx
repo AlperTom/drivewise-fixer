@@ -33,27 +33,27 @@ const Navigation = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2">
           <div className="p-2 rounded-xl bg-gradient-carbot">
             <Car className="h-6 w-6 text-white" />
           </div>
           <span className="text-2xl font-bold bg-gradient-carbot bg-clip-text text-transparent">
             CarBot
           </span>
-        </div>
+        </Link>
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-8">
-          <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">
+          <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
             Features
           </a>
-          <a href="/#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+          <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
             Preise
           </a>
           <Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
             Live Demo
           </Link>
-          <a href="/#contact" className="text-muted-foreground hover:text-foreground transition-colors">
+          <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
             Kontakt
           </a>
         </div>
