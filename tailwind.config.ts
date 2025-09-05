@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -52,16 +53,29 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				automotive: {
+					orange: 'hsl(var(--automotive-orange))',
+					purple: 'hsl(var(--automotive-purple))',
+					blue: 'hsl(var(--automotive-blue))',
+					success: 'hsl(var(--automotive-success))',
+					warning: 'hsl(var(--automotive-warning))'
 				}
+			},
+			backgroundImage: {
+				'gradient-carbot': 'var(--gradient-carbot)',
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)'
+			},
+			boxShadow: {
+				'carbot': 'var(--shadow-carbot)',
+				'glow': 'var(--shadow-glow)',
+				'card-automotive': 'var(--shadow-card)'
+			},
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+			},
+			animation: {
+				'pulse-automotive': 'pulse-automotive 2s ease-in-out infinite',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

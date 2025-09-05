@@ -2,95 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* CarBot Automotive Design System - Professional German Market Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Automotive Brand Colors */
+    --background: 220 27% 6%;
+    --foreground: 220 9% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 25% 8%;
+    --card-foreground: 220 9% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 25% 8%;
+    --popover-foreground: 220 9% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* CarBot Brand Gradient */
+    --primary: 14 100% 63%;
+    --primary-foreground: 220 27% 6%;
+    --primary-glow: 280 100% 70%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 220 9% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 220 5% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 280 100% 70%;
+    --accent-foreground: 220 27% 6%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 220 9% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 20% 15%;
+    --input: 220 20% 12%;
+    --ring: 14 100% 63%;
 
-    --radius: 0.5rem;
+    /* Automotive Specific Colors */
+    --automotive-orange: 14 100% 63%;
+    --automotive-purple: 280 100% 70%;
+    --automotive-blue: 217 91% 60%;
+    --automotive-success: 142 76% 36%;
+    --automotive-warning: 38 92% 50%;
 
-    --sidebar-background: 0 0% 98%;
+    /* Premium Gradients */
+    --gradient-carbot: linear-gradient(135deg, hsl(var(--automotive-orange)), hsl(var(--automotive-purple)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(220 25% 8%));
+    --gradient-card: linear-gradient(145deg, hsl(220 25% 8%), hsl(220 20% 12%));
+    
+    /* Shadows & Effects */
+    --shadow-carbot: 0 10px 40px -10px hsl(var(--automotive-orange) / 0.3);
+    --shadow-glow: 0 0 50px hsl(var(--automotive-purple) / 0.2);
+    --shadow-card: 0 4px 20px hsl(220 30% 4% / 0.5);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --radius: 0.75rem;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 220 27% 6%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 27% 6%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 27% 6%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 14 100% 63%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 5% 96%;
+    --secondary-foreground: 220 27% 6%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 5% 96%;
+    --muted-foreground: 220 5% 45%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 280 100% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
   }
 }
 
@@ -98,8 +93,99 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Automotive Typography */
+  .automotive-title {
+    @apply text-4xl md:text-6xl font-bold tracking-tight;
+    background: var(--gradient-carbot);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .automotive-subtitle {
+    @apply text-lg md:text-xl text-muted-foreground leading-relaxed;
+  }
+
+  /* Automotive Button Effects */
+  .btn-carbot {
+    @apply relative overflow-hidden rounded-xl px-8 py-4 font-semibold transition-all duration-300;
+    background: var(--gradient-carbot);
+    box-shadow: var(--shadow-carbot);
+  }
+
+  .btn-carbot:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-carbot), var(--shadow-glow);
+  }
+
+  .btn-carbot::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, hsl(var(--automotive-purple)), hsl(var(--automotive-orange)));
+  }
+
+  .btn-carbot:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Card Effects */
+  .card-automotive {
+    @apply relative overflow-hidden rounded-2xl border border-border/50 p-6;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+
+  .card-automotive:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+  }
+
+  /* Glow Effects */
+  .glow-orange {
+    box-shadow: 0 0 30px hsl(var(--automotive-orange) / 0.3);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 30px hsl(var(--automotive-purple) / 0.3);
+  }
+
+  /* Loading Animation */
+  @keyframes pulse-automotive {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(var(--automotive-orange) / 0.5);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(var(--automotive-purple) / 0.8);
+    }
+  }
+
+  .animate-pulse-automotive {
+    animation: pulse-automotive 2s ease-in-out infinite;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background: var(--gradient-carbot);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--gradient-carbot);
+    filter: brightness(1.2);
   }
 }
