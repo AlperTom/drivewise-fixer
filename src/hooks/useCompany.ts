@@ -3,6 +3,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
+// Database types (as returned from Supabase)
+export interface CompanyRow {
+  id: string;
+  user_id: string;
+  company_name: string;
+  business_type: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logo_url?: string;
+  brand_colors: any;
+  description?: string;
+  specialties: string[];
+  business_hours: any;
+  created_at: string;
+  updated_at: string;
+}
+
+// Application types (with proper unions)
 export interface Company {
   id: string;
   user_id: string;
@@ -24,6 +44,22 @@ export interface Company {
   updated_at: string;
 }
 
+export interface ServiceRow {
+  id: string;
+  company_id: string;
+  service_name: string;
+  description?: string;
+  category: string;
+  estimated_duration: number;
+  requires_appointment: boolean;
+  service_details?: string;
+  prerequisites?: string;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Service {
   id: string;
   company_id: string;
@@ -40,6 +76,18 @@ export interface Service {
   updated_at: string;
 }
 
+export interface PricingRuleRow {
+  id: string;
+  service_id: string;
+  car_type: string;
+  base_price?: number;
+  max_price?: number;
+  pricing_type: string;
+  additional_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PricingRule {
   id: string;
   service_id: string;
@@ -50,6 +98,18 @@ export interface PricingRule {
   additional_notes?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface QuickActionRow {
+  id: string;
+  company_id: string;
+  action_text: string;
+  action_type: string;
+  message_template?: string;
+  icon_name: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
 }
 
 export interface QuickAction {
@@ -63,6 +123,29 @@ export interface QuickAction {
   is_active: boolean;
   created_at: string;
 }
+
+// Type conversion functions
+const convertCompanyRow = (row: CompanyRow): Company => ({
+  ...row,
+  business_type: row.business_type as Company['business_type'],
+  brand_colors: typeof row.brand_colors === 'object' ? row.brand_colors : { primary: '#f97316', secondary: '#1f2937' }
+});
+
+const convertServiceRow = (row: ServiceRow): Service => ({
+  ...row,
+  category: row.category as Service['category']
+});
+
+const convertPricingRuleRow = (row: PricingRuleRow): PricingRule => ({
+  ...row,
+  car_type: row.car_type as PricingRule['car_type'],
+  pricing_type: row.pricing_type as PricingRule['pricing_type']
+});
+
+const convertQuickActionRow = (row: QuickActionRow): QuickAction => ({
+  ...row,
+  action_type: row.action_type as QuickAction['action_type']
+});
 
 export const useCompany = () => {
   const { user } = useAuth();
@@ -88,7 +171,7 @@ export const useCompany = () => {
         throw error;
       }
 
-      setCompany(data);
+      setCompany(data ? convertCompanyRow(data) : null);
     } catch (error) {
       console.error('Error fetching company:', error);
       toast({
@@ -112,7 +195,7 @@ export const useCompany = () => {
         .order('display_order');
 
       if (error) throw error;
-      setServices(data || []);
+      setServices(data ? data.map(convertServiceRow) : []);
     } catch (error) {
       console.error('Error fetching services:', error);
     }
@@ -130,7 +213,7 @@ export const useCompany = () => {
         .in('service_id', serviceIds);
 
       if (error) throw error;
-      setPricingRules(data || []);
+      setPricingRules(data ? data.map(convertPricingRuleRow) : []);
     } catch (error) {
       console.error('Error fetching pricing rules:', error);
     }
@@ -149,7 +232,7 @@ export const useCompany = () => {
         .order('display_order');
 
       if (error) throw error;
-      setQuickActions(data || []);
+      setQuickActions(data ? data.map(convertQuickActionRow) : []);
     } catch (error) {
       console.error('Error fetching quick actions:', error);
     }
@@ -172,12 +255,25 @@ export const useCompany = () => {
       } else {
         const { data, error } = await supabase
           .from('companies')
-          .insert({ ...companyData, user_id: user.id })
+          .insert({ 
+            user_id: user.id,
+            company_name: companyData.company_name || '',
+            business_type: companyData.business_type || 'werkstatt',
+            address: companyData.address,
+            phone: companyData.phone,
+            email: companyData.email,
+            website: companyData.website,
+            logo_url: companyData.logo_url,
+            brand_colors: companyData.brand_colors || { primary: '#f97316', secondary: '#1f2937' },
+            description: companyData.description,
+            specialties: companyData.specialties || [],
+            business_hours: companyData.business_hours || {}
+          })
           .select()
           .single();
 
         if (error) throw error;
-        setCompany(data);
+        setCompany(convertCompanyRow(data));
       }
 
       toast({
@@ -214,12 +310,23 @@ export const useCompany = () => {
       } else {
         const { data, error } = await supabase
           .from('services')
-          .insert({ ...serviceData, company_id: company.id })
+          .insert({ 
+            company_id: company.id,
+            service_name: serviceData.service_name || '',
+            description: serviceData.description,
+            category: serviceData.category || 'maintenance',
+            estimated_duration: serviceData.estimated_duration || 60,
+            requires_appointment: serviceData.requires_appointment ?? true,
+            service_details: serviceData.service_details,
+            prerequisites: serviceData.prerequisites,
+            is_active: serviceData.is_active ?? true,
+            display_order: serviceData.display_order || 0
+          })
           .select()
           .single();
 
         if (error) throw error;
-        setServices(prev => [...prev, data]);
+        setServices(prev => [...prev, convertServiceRow(data)]);
       }
 
       toast({
@@ -254,12 +361,19 @@ export const useCompany = () => {
       } else {
         const { data, error } = await supabase
           .from('pricing_rules')
-          .insert(pricingData)
+          .insert({
+            service_id: pricingData.service_id!,
+            car_type: pricingData.car_type || 'mittelklasse',
+            base_price: pricingData.base_price,
+            max_price: pricingData.max_price,
+            pricing_type: pricingData.pricing_type || 'fixed',
+            additional_notes: pricingData.additional_notes
+          })
           .select()
           .single();
 
         if (error) throw error;
-        setPricingRules(prev => [...prev, data]);
+        setPricingRules(prev => [...prev, convertPricingRuleRow(data)]);
       }
 
       return true;
@@ -291,12 +405,20 @@ export const useCompany = () => {
       } else {
         const { data, error } = await supabase
           .from('quick_actions')
-          .insert({ ...actionData, company_id: company.id })
+          .insert({
+            company_id: company.id,
+            action_text: actionData.action_text || '',
+            action_type: actionData.action_type || 'message',
+            message_template: actionData.message_template,
+            icon_name: actionData.icon_name || 'wrench',
+            display_order: actionData.display_order || 0,
+            is_active: actionData.is_active ?? true
+          })
           .select()
           .single();
 
         if (error) throw error;
-        setQuickActions(prev => [...prev, data]);
+        setQuickActions(prev => [...prev, convertQuickActionRow(data)]);
       }
 
       toast({

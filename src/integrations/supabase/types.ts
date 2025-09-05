@@ -291,6 +291,39 @@ export type Database = {
           },
         ]
       }
+      customer_data_audit: {
+        Row: {
+          accessed_at: string
+          action: string
+          company_id: string | null
+          customer_email: string | null
+          customer_phone: string | null
+          id: string
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          action: string
+          company_id?: string | null
+          customer_email?: string | null
+          customer_phone?: string | null
+          id?: string
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          action?: string
+          company_id?: string | null
+          customer_email?: string | null
+          customer_phone?: string | null
+          id?: string
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           activity_type: string
@@ -573,7 +606,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_customer_access: {
+        Args: {
+          p_action?: string
+          p_company_id: string
+          p_customer_email?: string
+          p_customer_phone?: string
+          p_table_name: string
+        }
+        Returns: undefined
+      }
+      mask_customer_data: {
+        Args: {
+          check_company_id: string
+          check_user_id: string
+          data_field: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

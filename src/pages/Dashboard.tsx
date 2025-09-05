@@ -277,7 +277,7 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="h-96">
-                    <ChatBot companyId={company?.id} />
+                    <ChatBot />
                   </div>
                 </CardContent>
               </Card>

@@ -3,6 +3,38 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
+// Database row types
+interface LeadRow {
+  id: string;
+  company_id: string;
+  session_id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  lead_score: number;
+  status: string;
+  service_needed?: string;
+  urgency_level: string;
+  vehicle_info: any;
+  estimated_value?: number;
+  source: string;
+  notes?: string;
+  last_contact?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface LeadActivityRow {
+  id: string;
+  lead_id: string;
+  activity_type: string;
+  description: string;
+  metadata: any;
+  timestamp: string;
+}
+
+// Application types
 export interface Lead {
   id: string;
   company_id: string;
@@ -32,6 +64,18 @@ export interface LeadActivity {
   metadata: any;
   timestamp: string;
 }
+
+// Type converters
+const convertLeadRow = (row: LeadRow): Lead => ({
+  ...row,
+  status: row.status as Lead['status'],
+  urgency_level: row.urgency_level as Lead['urgency_level']
+});
+
+const convertLeadActivityRow = (row: LeadActivityRow): LeadActivity => ({
+  ...row,
+  activity_type: row.activity_type as LeadActivity['activity_type']
+});
 
 export const useLeads = (companyId?: string) => {
   const { user } = useAuth();
@@ -196,7 +240,7 @@ export const useLeads = (companyId?: string) => {
           .single();
 
         if (error) throw error;
-        lead = data;
+        lead = convertLeadRow(data);
       } else {
         // Create new lead
         const { data, error } = await supabase
@@ -206,7 +250,7 @@ export const useLeads = (companyId?: string) => {
           .single();
 
         if (error) throw error;
-        lead = data;
+        lead = convertLeadRow(data);
       }
 
       // Add activity
@@ -248,7 +292,7 @@ export const useLeads = (companyId?: string) => {
 
       if (error) throw error;
 
-      setActivities(prev => [data, ...prev]);
+      setActivities(prev => [convertLeadActivityRow(data), ...prev]);
       return true;
     } catch (error) {
       console.error('Error adding activity:', error);
@@ -268,7 +312,7 @@ export const useLeads = (companyId?: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLeads(data || []);
+      setLeads(data ? data.map(convertLeadRow) : []);
     } catch (error) {
       console.error('Error fetching leads:', error);
       toast({
@@ -300,7 +344,7 @@ export const useLeads = (companyId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setActivities(data || []);
+      setActivities(data ? data.map(convertLeadActivityRow) : []);
     } catch (error) {
       console.error('Error fetching activities:', error);
     }
